@@ -80,77 +80,41 @@ class HomePage extends StatelessWidget {
 
 class SensorCard extends StatelessWidget {
   final Map<String, dynamic> sensor;
-  final VoidCallback? onTap; // Tambahkan ini
+  final VoidCallback? onTap; // tambahkan ini
 
-  const SensorCard({super.key, required this.sensor, this.onTap});
+  SensorCard({required this.sensor, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // Bungkus seluruh konten dengan GestureDetector
-      onTap: onTap,
+      // atau pakai InkWell kalau pakai Material widget
+      onTap: onTap, // panggil fungsi onTap dari parameter
       child: Container(
-        margin: const EdgeInsets.all(8),
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: sensor['borderColor'], width: 2),
           color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 5,
+              offset: Offset(2, 2),
+            ),
+          ],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Stack(
-              children: [
-                Positioned(
-                  left: sensor['iconOffsetX'],
-                  top: sensor['iconOffsetY'],
-                  child: Icon(
-                    sensor['icon'],
-                    color: sensor['iconColor'],
-                    size: sensor['iconSize'],
-                  ),
-                ),
-                Positioned(
-                  left: sensor['valueOffsetX'],
-                  top: sensor['valueOffsetY'],
-                  child: Text(
-                    sensor['value'],
-                    style: TextStyle(
-                      fontSize: sensor['valueFontSize'],
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 55),
-            Text(
-              sensor['title'],
-              style: TextStyle(
-                fontSize: sensor['titleFontSize'],
-                color: sensor['titleColor'],
-                decoration:
-                    sensor['underline'] ? TextDecoration.underline : null,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: sensor['borderColor'],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                sensor['status'],
-                textAlign: TextAlign.center,
+            Icon(sensor['icon'], color: Colors.blue, size: 32),
+            SizedBox(height: 8),
+            Text('${sensor['value']} ${sensor['unit']}',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Text(sensor['title'], style: TextStyle(color: Colors.green)),
+            SizedBox(height: 4),
+            Text(sensor['status'],
                 style: TextStyle(
-                  fontSize: sensor['statusFontSize'],
-                  color: Colors.white,
-                ),
-              ),
-            )
+                    color: Colors.green, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
