@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1049076270818",
+    "project_id": "lora-multihop",
+    "storage_bucket": "lora-multihop.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1049076270818:android:4d9e197980f4d36d7200bb",
+        "android_client_info": {
+          "package_name": "com.example.smart_agriculture_jadi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1049076270818-taql28ok0l2stmg4fduhcjsp1eunh1rv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5iT04_hiyfcxSdVI51oIPsyyA5sm3dIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1049076270818-taql28ok0l2stmg4fduhcjsp1eunh1rv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
