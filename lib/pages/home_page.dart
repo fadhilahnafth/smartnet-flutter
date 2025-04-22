@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:smart_agriculture_jadi/pages/sensor_kalium.dart';
+import 'package:smart_agriculture_jadi/pages/sensor_kelembaban.dart';
+// import 'package:smart_agriculture_jadi/pages/sensor_kelembaban.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_ph.dart';
+import 'package:smart_agriculture_jadi/pages/sensor_phospor.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_suhu.dart';
 
 void main() {
@@ -67,6 +71,17 @@ class HomePage extends StatelessWidget {
                 } else if (title == "pH") {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (_) => SensorPhPage()));
+                } else if (title == "Kalium") {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => SensorKaliumPage()));
+                } else if (title == "Soil Moisture") {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => SensorKelembabanPage()));
+                } else if (title == "Phospor") {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => SensorPhosporPage()));
                 }
                 // Tambah routing lainnya di sini
               },
@@ -105,7 +120,7 @@ class SensorCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(sensor['icon'], color: Colors.blue, size: 32),
+            Icon(sensor['icon'], color: Colors.orange, size: 32),
             SizedBox(height: 8),
             Text('${sensor['value']} ${sensor['unit']}',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -121,6 +136,84 @@ class SensorCard extends StatelessWidget {
     );
   }
 }
+// class SensorCard extends StatelessWidget {
+//   final Map<String, dynamic> sensor;
+//   final VoidCallback? onTap;
+
+//   const SensorCard({super.key, required this.sensor, this.onTap});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Container(
+//         margin: const EdgeInsets.all(8),
+//         padding: const EdgeInsets.all(10),
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(20),
+//           border: Border.all(color: sensor['borderColor'], width: 2),
+//           color: Colors.white,
+//         ),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.start,
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Stack(
+//               children: [
+//                 Positioned(
+//                   left: sensor['iconOffsetX'],
+//                   top: sensor['iconOffsetY'],
+//                   child: Icon(
+//                     sensor['icon'],
+//                     color: sensor['iconColor'],
+//                     size: sensor['iconSize'],
+//                   ),
+//                 ),
+//                 Positioned(
+//                   left: sensor['valueOffsetX'],
+//                   top: sensor['valueOffsetY'],
+//                   child: Text(
+//                     sensor['value'],
+//                     style: TextStyle(
+//                       fontSize: sensor['valueFontSize'],
+//                       fontWeight: FontWeight.bold,
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             const SizedBox(height: 55),
+//             Text(
+//               sensor['title'],
+//               style: TextStyle(
+//                 fontSize: sensor['titleFontSize'],
+//                 color: sensor['titleColor'],
+//                 decoration:
+//                     sensor['underline'] ? TextDecoration.underline : null,
+//               ),
+//             ),
+//             const SizedBox(height: 4),
+//             Container(
+//               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+//               decoration: BoxDecoration(
+//                 color: sensor['borderColor'],
+//                 borderRadius: BorderRadius.circular(20),
+//               ),
+//               child: Text(
+//                 sensor['status'],
+//                 textAlign: TextAlign.center,
+//                 style: TextStyle(
+//                   fontSize: sensor['statusFontSize'],
+//                   color: Colors.white,
+//                 ),
+//               ),
+//             )
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 // Data Sensor tetap sama
 List<Map<String, dynamic>> sensorData = [
@@ -130,7 +223,7 @@ List<Map<String, dynamic>> sensorData = [
     "iconSize": 45.0,
     "iconOffsetX": 2.5,
     "iconOffsetY": 7.0,
-    "value": "25.5 °C",
+    "value": "24.5 °C",
     "valueOffsetX": 60.0,
     "valueOffsetY": 15.0,
     "valueFontSize": 20.0,
