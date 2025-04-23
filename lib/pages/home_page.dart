@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_kalium.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_kelembaban.dart';
-// import 'package:smart_agriculture_jadi/pages/sensor_kelembaban.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_ph.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_phospor.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_suhu.dart';
@@ -93,22 +92,69 @@ class HomePage extends StatelessWidget {
   }
 }
 
+// class SensorCard extends StatelessWidget {
+//   final Map<String, dynamic> sensor;
+//   final VoidCallback? onTap; // tambahkan ini
+
+//   SensorCard({required this.sensor, this.onTap});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       // atau pakai InkWell kalau pakai Material widget
+//       onTap: onTap, // panggil fungsi onTap dari parameter
+//       child: Container(
+//         padding: EdgeInsets.all(12),
+//         decoration: BoxDecoration(
+//           color: Colors.white,
+//           borderRadius: BorderRadius.circular(24),
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.black12,
+//               blurRadius: 5,
+//               offset: Offset(2, 2),
+//             ),
+//           ],
+//         ),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(sensor['icon'], color: Colors.orange, size: 32),
+//             SizedBox(height: 8),
+//             Text('${sensor['value']} ${sensor['unit']}',
+//                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//             SizedBox(height: 8),
+//             Text(sensor['title'], style: TextStyle(color: Colors.green)),
+//             SizedBox(height: 4),
+//             Text(sensor['status'],
+//                 style: TextStyle(
+//                     color: Colors.green, fontWeight: FontWeight.bold)),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
 class SensorCard extends StatelessWidget {
   final Map<String, dynamic> sensor;
-  final VoidCallback? onTap; // tambahkan ini
+  final VoidCallback? onTap;
 
   SensorCard({required this.sensor, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // atau pakai InkWell kalau pakai Material widget
-      onTap: onTap, // panggil fungsi onTap dari parameter
+      onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: sensor['borderColor'] ?? Colors.transparent,
+            width: 2,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black12,
@@ -117,103 +163,65 @@ class SensorCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Icon(sensor['icon'], color: Colors.orange, size: 32),
-            SizedBox(height: 8),
-            Text('${sensor['value']} ${sensor['unit']}',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text(sensor['title'], style: TextStyle(color: Colors.green)),
-            SizedBox(height: 4),
-            Text(sensor['status'],
+            // Icon
+            Positioned(
+              left: sensor['iconOffsetX'] ?? 0.0,
+              top: sensor['iconOffsetY'] ?? 0.0,
+              child: Icon(
+                sensor['icon'],
+                color: sensor['iconColor'] ?? Colors.orange,
+                size: sensor['iconSize']?.toDouble() ?? 32.0,
+              ),
+            ),
+            // Value
+            Positioned(
+              left: sensor['valueOffsetX'] ?? 0.0,
+              top: sensor['valueOffsetY'] ?? 0.0,
+              child: Text(
+                sensor['value'] ?? '-',
                 style: TextStyle(
-                    color: Colors.green, fontWeight: FontWeight.bold)),
+                  fontSize: sensor['valueFontSize']?.toDouble() ?? 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            // Title
+            Positioned(
+              left: sensor['titleOffsetX'] ?? 0.0,
+              top: sensor['titleOffsetY'] ?? 0.0,
+              child: Text(
+                sensor['title'] ?? '',
+                style: TextStyle(
+                  fontSize: sensor['titleFontSize']?.toDouble() ?? 13.0,
+                  fontWeight: FontWeight.bold,
+                  color: sensor['titleColor'] ?? Colors.green,
+                  decoration: (sensor['underline'] ?? false)
+                      ? TextDecoration.underline
+                      : TextDecoration.none,
+                ),
+              ),
+            ),
+            // Status
+            Positioned(
+              left: sensor['statusOffsetX'] ?? 0.0,
+              top: sensor['statusOffsetY'] ?? 0.0,
+              child: Text(
+                sensor['status'] ?? '',
+                style: TextStyle(
+                  fontSize: sensor['statusFontSize']?.toDouble() ?? 10.0,
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
-// class SensorCard extends StatelessWidget {
-//   final Map<String, dynamic> sensor;
-//   final VoidCallback? onTap;
-
-//   const SensorCard({super.key, required this.sensor, this.onTap});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onTap: onTap,
-//       child: Container(
-//         margin: const EdgeInsets.all(8),
-//         padding: const EdgeInsets.all(10),
-//         decoration: BoxDecoration(
-//           borderRadius: BorderRadius.circular(20),
-//           border: Border.all(color: sensor['borderColor'], width: 2),
-//           color: Colors.white,
-//         ),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.start,
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Stack(
-//               children: [
-//                 Positioned(
-//                   left: sensor['iconOffsetX'],
-//                   top: sensor['iconOffsetY'],
-//                   child: Icon(
-//                     sensor['icon'],
-//                     color: sensor['iconColor'],
-//                     size: sensor['iconSize'],
-//                   ),
-//                 ),
-//                 Positioned(
-//                   left: sensor['valueOffsetX'],
-//                   top: sensor['valueOffsetY'],
-//                   child: Text(
-//                     sensor['value'],
-//                     style: TextStyle(
-//                       fontSize: sensor['valueFontSize'],
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//             const SizedBox(height: 55),
-//             Text(
-//               sensor['title'],
-//               style: TextStyle(
-//                 fontSize: sensor['titleFontSize'],
-//                 color: sensor['titleColor'],
-//                 decoration:
-//                     sensor['underline'] ? TextDecoration.underline : null,
-//               ),
-//             ),
-//             const SizedBox(height: 4),
-//             Container(
-//               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-//               decoration: BoxDecoration(
-//                 color: sensor['borderColor'],
-//                 borderRadius: BorderRadius.circular(20),
-//               ),
-//               child: Text(
-//                 sensor['status'],
-//                 textAlign: TextAlign.center,
-//                 style: TextStyle(
-//                   fontSize: sensor['statusFontSize'],
-//                   color: Colors.white,
-//                 ),
-//               ),
-//             )
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 // Data Sensor tetap sama
 List<Map<String, dynamic>> sensorData = [
@@ -223,17 +231,21 @@ List<Map<String, dynamic>> sensorData = [
     "iconSize": 45.0,
     "iconOffsetX": 2.5,
     "iconOffsetY": 7.0,
-    "value": "24.5 °C",
+    "value": "27°C",
     "valueOffsetX": 60.0,
     "valueOffsetY": 15.0,
     "valueFontSize": 20.0,
     "title": "Temperature",
     "titleFontSize": 13.0,
     "titleColor": Colors.green,
+    "titleOffsetX": 10.0,
+    "titleOffsetY": 120.0,
     "statusFontSize": 10.0,
     "underline": false,
     "status": "SUBUR",
-    "borderColor": Colors.green,
+    "statusOffsetX": 105.0,
+    "statusOffsetY": 120.0,
+    //"borderColor": Colors.green,
     "page": SensorSuhuPage(),
   },
   {
@@ -243,12 +255,16 @@ List<Map<String, dynamic>> sensorData = [
     "iconOffsetY": 16.0,
     "title": "pH",
     "titleColor": Colors.blue,
-    "value": "3.5",
+    "titleOffsetX": 10.0,
+    "titleOffsetY": 120.0,
+    "value": "5.5",
     "valueFontSize": 20.0,
     "valueOffsetX": 60.0,
     "valueOffsetY": 15.0,
-    "status": "TIDAK SUBUR",
-    "borderColor": Colors.red,
+    "status": "TIDAK\nSUBUR",
+    "statusOffsetX": 90.0,
+    "statusOffsetY": 110.0,
+    //"borderColor": Colors.red,
     "iconSize": 36.0,
     "titleFontSize": 12.0,
     "statusFontSize": 10.0,
@@ -260,12 +276,16 @@ List<Map<String, dynamic>> sensorData = [
     "iconOffsetX": 3.0,
     "iconOffsetY": 16.0,
     "title": "Nitrogen",
+    "titleOffsetX": 10.0,
+    "titleOffsetY": 120.0,
     "titleColor": Colors.purple,
     "value": "160.5 ppm",
     "valueOffsetX": 50.0,
     "valueOffsetY": 20.0,
     "status": "SUBUR",
-    "borderColor": Colors.green,
+    "statusOffsetX": 105.0,
+    "statusOffsetY": 120.0,
+    //"borderColor": Colors.green,
     "iconSize": 40.0,
     "valueFontSize": 20.0,
     "titleFontSize": 15.0,
@@ -278,13 +298,17 @@ List<Map<String, dynamic>> sensorData = [
     "iconOffsetX": 3.0,
     "iconOffsetY": 10.0,
     "title": "Soil Moisture",
+    "titleOffsetX": 10.0,
+    "titleOffsetY": 120.0,
     "titleColor": Colors.brown,
     "value": "65.5%",
     "valueFontSize": 20.0,
     "valueOffsetX": 60.0,
-    "valueOffsetY": 15.0,
+    "valueOffsetY": 20.0,
     "status": "KURANG\nSUBUR",
-    "borderColor": Colors.orange,
+    "statusOffsetX": 90.0,
+    "statusOffsetY": 110.0,
+    //"borderColor": Colors.orange,
     "iconSize": 36.0,
     "titleFontSize": 12.0,
     "statusFontSize": 10.0,
@@ -296,13 +320,17 @@ List<Map<String, dynamic>> sensorData = [
     "iconOffsetX": 3.0,
     "iconOffsetY": 16.0,
     "title": "Kalium",
+    "titleOffsetX": 10.0,
+    "titleOffsetY": 120.0,
     "titleColor": Colors.green,
     "value": "115 ppm",
     "valueFontSize": 20.0,
-    "valueOffsetX": 60.0,
-    "valueOffsetY": 15.0,
+    "valueOffsetX": 50.0,
+    "valueOffsetY": 20.0,
     "status": "KURANG\nSUBUR",
-    "borderColor": Colors.orange,
+    "statusOffsetX": 105.0,
+    "statusOffsetY": 120.0,
+    // "borderColor": Colors.orange,
     "iconSize": 36.0,
     "titleFontSize": 12.0,
     "statusFontSize": 10.0,
@@ -313,17 +341,20 @@ List<Map<String, dynamic>> sensorData = [
     "iconColor": Colors.purple,
     "iconOffsetX": 3.0,
     "iconOffsetY": 12.0,
-    "title": "Phospor",
-    "titleColor": Colors.purple,
-    "value": "160.5 ppm",
-    "valueOffsetX": 52.0,
-    "valueOffsetY": 15.0,
-    "status": "SUBUR",
-    "borderColor": Colors.green,
     "iconSize": 40.0,
-    "valueFontSize": 20.0,
+    "title": "Phospor",
+    "titleOffsetX": 10.0,
+    "titleOffsetY": 120.0,
     "titleFontSize": 15.0,
+    "titleColor": Colors.purple,
+    "value": "161 ppm",
+    "valueFontSize": 20.0,
+    "valueOffsetX": 50.0,
+    "valueOffsetY": 20.0,
+    "status": "SUBUR",
     "statusFontSize": 10.0,
+    "statusOffsetX": 105.0,
+    "statusOffsetY": 120.0,
     "underline": false,
   },
 ];
