@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_kalium.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_kelembaban.dart';
+import 'package:smart_agriculture_jadi/pages/sensor_nitrogen.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_ph.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_phospor.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_suhu.dart';
@@ -81,6 +82,9 @@ class HomePage extends StatelessWidget {
                 } else if (title == "Phospor") {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (_) => SensorPhosporPage()));
+                } else if (title == "Nitrogen") {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => SensorNitrogenPage()));
                 }
                 // Tambah routing lainnya di sini
               },
