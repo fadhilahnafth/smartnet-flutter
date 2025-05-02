@@ -67,7 +67,7 @@ class _CobaState extends State<Coba> {
                     LineChartBarData(
                       spots: spots,
                       isCurved: false,
-                      color: Colors.blue,
+                      // color: Colors.blue,
                       barWidth: 3,
                       dotData: FlDotData(show: true),
                     ),

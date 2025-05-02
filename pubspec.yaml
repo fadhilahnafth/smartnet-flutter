@@ -37,11 +37,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   table_calendar: ^3.2.0
   flutter_charts: ^0.5.2
-  fl_chart: ^0.71.0
+  fl_chart: ^0.66.0
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.3
   cloud_firestore: ^5.6.7
-  js: ^0.7.2
+  js: 0.7.1
   
 dev_dependencies:
   flutter_test:

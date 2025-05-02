@@ -28,7 +28,8 @@ class SensorPhPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text("Detail Sensor pH")),
       body: FutureBuilder<QuerySnapshot>(
-        future: uplinksRef.get(),
+        future:
+            uplinksRef.orderBy('createdAt', descending: true).limit(1).get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());

@@ -25,7 +25,8 @@ class SensorPhosporPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text("Detail Sensor Phospor")),
       body: FutureBuilder<QuerySnapshot>(
-        future: uplinksRef.get(),
+        future:
+            uplinksRef.orderBy('createdAt', descending: true).limit(1).get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -49,10 +50,10 @@ class SensorPhosporPage extends StatelessWidget {
               // final temperature = doc['temperature'] ?? 'N/A';
               //final ph = doc['ph'] ?? 'N/A';
               // final humidity = doc['humidity'] ?? 'N/A';
-              final phosphorus = doc['phosporus'] ?? 'N/A';
+              final phosphorus = doc['phosphorus'] ?? 'N/A';
 
               return ListTile(
-                title: Text("phospor"),
+                title: Text("phosphor"),
                 subtitle: Text("$phosphorus ppm"),
               );
             },
