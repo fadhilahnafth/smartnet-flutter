@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
+
 // import 'dart:math';
 
 class SensorSuhuPage extends StatelessWidget {
@@ -54,7 +55,8 @@ class SensorSuhuPage extends StatelessWidget {
                 SizedBox(height: 20),
 
                 // Tabel Rentang Suhu
-                Padding(
+                Container(
+                  color: Colors.white, // latar belakang putih
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Table(
                     border: TableBorder.all(),
@@ -77,44 +79,14 @@ class SensorSuhuPage extends StatelessWidget {
                 ),
                 SizedBox(height: 30),
 
+                SizedBox(height: 15),
                 Text("Grafik Sensor Suhu",
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 SizedBox(
                   height: 300,
                   child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child:
-                          // LineChart(
-                          //   LineChartData(
-                          //     minX: 0,
-                          //     maxX: 23,
-                          //     minY: 15,
-                          //     maxY: 35,
-                          //     gridData: FlGridData(show: true),
-                          //     titlesData: FlTitlesData(
-                          //       leftTitles: AxisTitles(
-                          //         sideTitles: SideTitles(showTitles: true),
-                          //       ),
-                          //       bottomTitles: AxisTitles(
-                          //         sideTitles: SideTitles(
-                          //           showTitles: true,
-                          //           interval: 3,
-                          //           getTitlesWidget: (value, _) =>
-                          //               Text("${value.toInt()}:00"),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //     lineBarsData: [
-                          //       LineChartBarData(
-                          //         spots: suhuPoints,
-                          //         isCurved: true,
-                          //         barWidth: 2,
-                          //         dotData: FlDotData(show: false),
-                          //       )
-                          //     ],
-                          //   ),
-                          // ),
-                          LineChart(
+                      child: LineChart(
                         LineChartData(
                           minX: 0,
                           maxX: 23,
