@@ -5,6 +5,7 @@ import 'package:smart_agriculture_jadi/pages/sensor_nitrogen.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_ph.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_phospor.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_suhu.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,22 +31,38 @@ class HomePage extends StatelessWidget {
         elevation: 0,
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundColor: Colors.grey[300],
-              child: Icon(Icons.person, color: Colors.black),
+            // Ambil user Google yang sedang login
+            Builder(
+              builder: (context) {
+                final user = FirebaseAuth.instance.currentUser;
+                return CircleAvatar(
+                  backgroundImage: user?.photoURL != null
+                      ? NetworkImage(user!.photoURL!)
+                      : null,
+                  backgroundColor: Colors.grey[300],
+                  child: user?.photoURL == null
+                      ? Icon(Icons.person, color: Colors.black)
+                      : null,
+                );
+              },
             ),
-            SizedBox(width: 15),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Selamat Datang",
-                    style: TextStyle(color: Colors.black, fontSize: 14)),
-                Text("FADHIL AHNAF",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold)),
-              ],
+            SizedBox(width: 20),
+            Builder(
+              builder: (context) {
+                final user = FirebaseAuth.instance.currentUser;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Selamat Datang",
+                        style: TextStyle(color: Colors.black, fontSize: 14)),
+                    Text(user?.displayName ?? "Pengguna",
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold)),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -95,50 +112,6 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
-// class SensorCard extends StatelessWidget {
-//   final Map<String, dynamic> sensor;
-//   final VoidCallback? onTap; // tambahkan ini
-
-//   SensorCard({required this.sensor, this.onTap});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       // atau pakai InkWell kalau pakai Material widget
-//       onTap: onTap, // panggil fungsi onTap dari parameter
-//       child: Container(
-//         padding: EdgeInsets.all(12),
-//         decoration: BoxDecoration(
-//           color: Colors.white,
-//           borderRadius: BorderRadius.circular(24),
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.black12,
-//               blurRadius: 5,
-//               offset: Offset(2, 2),
-//             ),
-//           ],
-//         ),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             Icon(sensor['icon'], color: Colors.orange, size: 32),
-//             SizedBox(height: 8),
-//             Text('${sensor['value']} ${sensor['unit']}',
-//                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-//             SizedBox(height: 8),
-//             Text(sensor['title'], style: TextStyle(color: Colors.green)),
-//             SizedBox(height: 4),
-//             Text(sensor['status'],
-//                 style: TextStyle(
-//                     color: Colors.green, fontWeight: FontWeight.bold)),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 class SensorCard extends StatelessWidget {
   final Map<String, dynamic> sensor;
