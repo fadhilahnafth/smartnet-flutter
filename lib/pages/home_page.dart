@@ -6,6 +6,7 @@ import 'package:smart_agriculture_jadi/pages/sensor_ph.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_phospor.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_suhu.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,7 +22,136 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+// class HomePage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Color(0xFFEAEAE3),
+//       appBar: AppBar(
+//         backgroundColor: Colors.white,
+//         elevation: 0,
+//         title: Row(
+//           children: [
+//             // Ambil user Google yang sedang login
+//             Builder(
+//               builder: (context) {
+//                 final user = FirebaseAuth.instance.currentUser;
+//                 return CircleAvatar(
+//                   backgroundImage: user?.photoURL != null
+//                       ? NetworkImage(user!.photoURL!)
+//                       : null,
+//                   backgroundColor: Colors.grey[300],
+//                   child: user?.photoURL == null
+//                       ? Icon(Icons.person, color: Colors.black)
+//                       : null,
+//                 );
+//               },
+//             ),
+//             SizedBox(width: 20),
+//             Builder(
+//               builder: (context) {
+//                 final user = FirebaseAuth.instance.currentUser;
+//                 return Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Text("Selamat Datang",
+//                         style: TextStyle(color: Colors.black, fontSize: 14)),
+//                     Text(user?.displayName ?? "Pengguna",
+//                         style: TextStyle(
+//                             color: Colors.black,
+//                             fontSize: 16,
+//                             fontWeight: FontWeight.bold)),
+//                   ],
+//                 );
+//               },
+//             ),
+//           ],
+//         ),
+//       ),
+//       body: Padding(
+//         padding: EdgeInsets.all(16),
+//         child: GridView.builder(
+//           itemCount: 6, // hanya tampilkan 4 sensor pertama
+//           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//             crossAxisCount: 2,
+//             crossAxisSpacing: 12,
+//             mainAxisSpacing: 12,
+//             childAspectRatio: 1,
+//           ),
+//           itemBuilder: (context, index) {
+//             return SensorCard(
+//               sensor: sensorData[index],
+//               onTap: () {
+//                 String title = sensorData[index]["title"];
+//                 if (title == "Temperature") {
+//                   Navigator.push(context,
+//                       MaterialPageRoute(builder: (_) => SensorSuhuPage()));
+//                 } else if (title == "pH") {
+//                   Navigator.push(context,
+//                       MaterialPageRoute(builder: (_) => SensorPhPage()));
+//                 } else if (title == "Kalium") {
+//                   Navigator.push(context,
+//                       MaterialPageRoute(builder: (_) => SensorKaliumPage()));
+//                 } else if (title == "Soil Moisture") {
+//                   Navigator.push(
+//                       context,
+//                       MaterialPageRoute(
+//                           builder: (_) => SensorKelembabanPage()));
+//                 } else if (title == "Phospor") {
+//                   Navigator.push(context,
+//                       MaterialPageRoute(builder: (_) => SensorPhosporPage()));
+//                 } else if (title == "Nitrogen") {
+//                   Navigator.push(context,
+//                       MaterialPageRoute(builder: (_) => SensorNitrogenPage()));
+//                 }
+//                 // Tambah routing lainnya di sini
+//               },
+//             );
+//           },
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  Map<String, dynamic>? latestData;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchLatestSensorData();
+  }
+
+  Future<void> fetchLatestSensorData() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('uplinks')
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final data = snapshot.docs.first.data();
+
+      setState(() {
+        latestData = data;
+
+        // Update sensorData dengan data dari Firestore
+        sensorData[0]['value'] = '${data['temperature'] ?? '-'}°C';
+        sensorData[1]['value'] = '${data['ph'] ?? '-'}';
+        sensorData[2]['value'] = '${data['nitrogen'] ?? '-'} ppm';
+        sensorData[3]['value'] = '${data['humidity'] ?? '-'}%';
+        sensorData[4]['value'] = '${data['potassium'] ?? '-'} ppm';
+        sensorData[5]['value'] = '${data['phosphorus'] ?? '-'} ppm';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,38 +161,30 @@ class HomePage extends StatelessWidget {
         elevation: 0,
         title: Row(
           children: [
-            // Ambil user Google yang sedang login
-            Builder(
-              builder: (context) {
-                final user = FirebaseAuth.instance.currentUser;
-                return CircleAvatar(
-                  backgroundImage: user?.photoURL != null
-                      ? NetworkImage(user!.photoURL!)
-                      : null,
-                  backgroundColor: Colors.grey[300],
-                  child: user?.photoURL == null
-                      ? Icon(Icons.person, color: Colors.black)
-                      : null,
-                );
-              },
+            CircleAvatar(
+              backgroundImage: FirebaseAuth.instance.currentUser?.photoURL !=
+                      null
+                  ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!)
+                  : null,
+              backgroundColor: Colors.grey[300],
+              child: FirebaseAuth.instance.currentUser?.photoURL == null
+                  ? Icon(Icons.person, color: Colors.black)
+                  : null,
             ),
             SizedBox(width: 20),
-            Builder(
-              builder: (context) {
-                final user = FirebaseAuth.instance.currentUser;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Selamat Datang",
-                        style: TextStyle(color: Colors.black, fontSize: 14)),
-                    Text(user?.displayName ?? "Pengguna",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold)),
-                  ],
-                );
-              },
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Selamat Datang",
+                    style: TextStyle(color: Colors.black, fontSize: 14)),
+                Text(
+                    FirebaseAuth.instance.currentUser?.displayName ??
+                        "Pengguna",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold)),
+              ],
             ),
           ],
         ),
@@ -70,7 +192,7 @@ class HomePage extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.all(16),
         child: GridView.builder(
-          itemCount: 6, // hanya tampilkan 4 sensor pertama
+          itemCount: 6,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 12,
@@ -103,7 +225,6 @@ class HomePage extends StatelessWidget {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (_) => SensorNitrogenPage()));
                 }
-                // Tambah routing lainnya di sini
               },
             );
           },
@@ -220,7 +341,6 @@ List<Map<String, dynamic>> sensorData = [
     "iconSize": 45.0,
     "iconOffsetX": 2.5,
     "iconOffsetY": 7.0,
-    "value": "27°C",
     "valueOffsetX": 60.0,
     "valueOffsetY": 15.0,
     "valueFontSize": 20.0,
@@ -251,7 +371,6 @@ List<Map<String, dynamic>> sensorData = [
     "titleFontSize": 12.0,
     "titleOffsetX": 10.0,
     "titleOffsetY": 120.0,
-    "value": "5.5",
     "valueFontSize": 20.0,
     "valueOffsetX": 60.0,
     "valueOffsetY": 15.0,
@@ -301,7 +420,6 @@ List<Map<String, dynamic>> sensorData = [
     "titleOffsetX": 10.0,
     "titleOffsetY": 120.0,
     "titleColor": Colors.brown,
-    "value": "65.5%",
     "valueFontSize": 20.0,
     "valueOffsetX": 60.0,
     "valueOffsetY": 20.0,

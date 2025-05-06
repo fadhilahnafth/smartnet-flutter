@@ -139,7 +139,7 @@ class SensorKaliumPage extends StatelessWidget {
                         minX: 0,
                         maxX: 23,
                         minY: 0,
-                        maxY: 250,
+                        maxY: 500,
                         gridData: FlGridData(show: true),
                         titlesData: FlTitlesData(
                           bottomTitles: AxisTitles(
