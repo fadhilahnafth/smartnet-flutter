@@ -128,6 +128,30 @@ class _HomePageState extends State<HomePage> {
     fetchLatestSensorData();
   }
 
+  // Future<void> fetchLatestSensorData() async {
+  //   final snapshot = await FirebaseFirestore.instance
+  //       .collection('uplinks')
+  //       .orderBy('createdAt', descending: true)
+  //       .limit(1)
+  //       .get();
+
+  //   if (snapshot.docs.isNotEmpty) {
+  //     final data = snapshot.docs.first.data();
+
+  //     setState(() {
+  //       latestData = data;
+
+  //       // // Update sensorData dengan data dari Firestore
+  //       sensorData[0]['value'] = '${data['temperature'] ?? '-'}°C';
+  //       sensorData[1]['value'] = '${data['ph'] ?? '-'}';
+  //       sensorData[2]['value'] = '${data['nitrogen'] ?? '-'} ppm';
+  //       sensorData[3]['value'] = '${data['humidity'] ?? '-'}%';
+  //       sensorData[4]['value'] = '${data['potassium'] ?? '-'} ppm';
+  //       sensorData[5]['value'] = '${data['phosphorus'] ?? '-'} ppm';
+  //     });
+  //   }
+  // }
+
   Future<void> fetchLatestSensorData() async {
     final snapshot = await FirebaseFirestore.instance
         .collection('uplinks')
@@ -138,16 +162,40 @@ class _HomePageState extends State<HomePage> {
     if (snapshot.docs.isNotEmpty) {
       final data = snapshot.docs.first.data();
 
+      final double temperature = (data['temperature'] ?? 0).toDouble();
+      final double soilMoisture = (data['humidity'] ?? 0).toDouble();
+      final double ph = (data['ph'] ?? 0).toDouble();
+
+      final String tempStatus = getStatus("Temperature", temperature);
+      final String moistStatus = getStatus("Soil Moisture", soilMoisture);
+      final String phStatus = getStatus("pH", ph);
+
       setState(() {
         latestData = data;
 
-        // Update sensorData dengan data dari Firestore
-        sensorData[0]['value'] = '${data['temperature'] ?? '-'}°C';
-        sensorData[1]['value'] = '${data['ph'] ?? '-'}';
+        sensorData[0]['value'] = '${temperature.toStringAsFixed(1)}°C';
+        sensorData[0]['status'] = tempStatus;
+        sensorData[0]['statusColor'] = getStatusColor(tempStatus);
+
+        sensorData[1]['value'] = '${ph.toStringAsFixed(1)}';
+        sensorData[1]['status'] = phStatus;
+        sensorData[1]['statusColor'] = getStatusColor(phStatus);
+
         sensorData[2]['value'] = '${data['nitrogen'] ?? '-'} ppm';
-        sensorData[3]['value'] = '${data['humidity'] ?? '-'}%';
+        sensorData[2]['status'] = '-';
+        sensorData[2]['statusColor'] = Colors.grey;
+
+        sensorData[3]['value'] = '${soilMoisture.toStringAsFixed(1)}%';
+        sensorData[3]['status'] = moistStatus;
+        sensorData[3]['statusColor'] = getStatusColor(moistStatus);
+
         sensorData[4]['value'] = '${data['potassium'] ?? '-'} ppm';
+        sensorData[4]['status'] = '-';
+        sensorData[4]['statusColor'] = Colors.grey;
+
         sensorData[5]['value'] = '${data['phosphorus'] ?? '-'} ppm';
+        sensorData[5]['status'] = '-';
+        sensorData[5]['statusColor'] = Colors.grey;
       });
     }
   }
@@ -309,7 +357,7 @@ class SensorCard extends StatelessWidget {
                 sensor['status'] ?? '',
                 style: TextStyle(
                   fontSize: sensor['statusFontSize']?.toDouble() ?? 10.0,
-                  color: Colors.green,
+                  color: sensor['statusColor'] ?? Colors.green,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -333,6 +381,43 @@ class SensorCard extends StatelessWidget {
   }
 }
 
+String getStatus(String type, double value) {
+  switch (type) {
+    case "Temperature":
+      if (value < 17) return "Tidak Subur";
+      if (value < 22) return "Kurang Subur";
+      if (value <= 27) return "Subur";
+      if (value <= 32) return "Kurang Subur";
+      return "Tidak Subur";
+    case "Soil Moisture":
+      if (value < 50) return "Tidak Subur";
+      if (value <= 70) return "Kurang Subur";
+      if (value <= 90) return "Subur";
+      return "Kurang Subur";
+    case "pH":
+      if (value < 5.5) return "Tidak Subur";
+      if (value < 6) return "Kurang Subur";
+      if (value <= 7.5) return "Subur";
+      if (value <= 8) return "Kurang Subur";
+      return "Tidak Subur";
+    default:
+      return "-";
+  }
+}
+
+Color getStatusColor(String status) {
+  switch (status) {
+    case "Subur":
+      return Colors.green;
+    case "Kurang Subur":
+      return Colors.orange;
+    case "Tidak Subur":
+      return Colors.red;
+    default:
+      return Colors.grey;
+  }
+}
+
 // Data Sensor tetap sama
 List<Map<String, dynamic>> sensorData = [
   {
@@ -350,9 +435,9 @@ List<Map<String, dynamic>> sensorData = [
     "titleOffsetX": 10.0,
     "titleOffsetY": 120.0,
     "underline": false,
-    "status": "TIDAK\nSUBUR",
+    "status": "status",
     "statusFontSize": 15.0,
-    "statusOffsetX": 55.0,
+    "statusOffsetX": 35.0,
     "statusOffsetY": 65.0,
     "detail": "detail",
     "detailFontSize": 13.0,
@@ -374,9 +459,10 @@ List<Map<String, dynamic>> sensorData = [
     "valueFontSize": 20.0,
     "valueOffsetX": 60.0,
     "valueOffsetY": 15.0,
-    "status": "TIDAK\nSUBUR",
+    "status": "status",
+    "statusColor": Colors.orange,
     "statusFontSize": 15.0,
-    "statusOffsetX": 55.0,
+    "statusOffsetX": 35.0,
     "statusOffsetY": 65.0,
     "detail": "detail",
     "detailFontSize": 13.0,
@@ -423,9 +509,9 @@ List<Map<String, dynamic>> sensorData = [
     "valueFontSize": 20.0,
     "valueOffsetX": 60.0,
     "valueOffsetY": 20.0,
-    "status": "KURANG\nSUBUR",
+    "status": "status",
     "statusFontSize": 15.0,
-    "statusOffsetX": 55.0,
+    "statusOffsetX": 35.0,
     "statusOffsetY": 65.0,
     "detail": "detail",
     "detailFontSize": 13.0,
