@@ -135,7 +135,7 @@ class SensorKelembabanPage extends StatelessWidget {
                           minX: 0,
                           maxX: 23,
                           minY: 20,
-                          maxY: 50,
+                          maxY: 100,
                           gridData: FlGridData(show: true),
                           titlesData: FlTitlesData(
                             bottomTitles: AxisTitles(
@@ -153,7 +153,7 @@ class SensorKelembabanPage extends StatelessWidget {
                             leftTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
-                                interval: 5,
+                                interval: 10,
                                 getTitlesWidget: (value, meta) {
                                   return Text("${value.toInt()}");
                                 },
