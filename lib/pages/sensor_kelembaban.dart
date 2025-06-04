@@ -398,7 +398,7 @@ class _SensorKelembabanPageState extends State<SensorKelembabanPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text("Grafik Sensor pH",
+                            const Text("Grafik Sensor Kelembaban",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             DropdownButton<int>(
