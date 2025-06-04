@@ -165,10 +165,16 @@ class _HomePageState extends State<HomePage> {
       final double temperature = (data['temperature'] ?? 0).toDouble();
       final double soilMoisture = (data['humidity'] ?? 0).toDouble();
       final double ph = (data['ph'] ?? 0).toDouble();
+      final double nitrogen = (data['nitrogen'] ?? 0).toDouble();
+      final double kalium = (data['potassium'] ?? 0).toDouble();
+      final double phospor = (data['phosphorus'] ?? 0).toDouble();
 
       final String tempStatus = getStatus("Temperature", temperature);
       final String moistStatus = getStatus("Soil Moisture", soilMoisture);
       final String phStatus = getStatus("pH", ph);
+      final String nitrogenStatus = getStatus("Nitrogen", nitrogen);
+      final String kaliumStatus = getStatus("Kalium", kalium);
+      final String phosporStatus = getStatus("Phospor", phospor);
 
       setState(() {
         latestData = data;
@@ -182,20 +188,20 @@ class _HomePageState extends State<HomePage> {
         sensorData[1]['statusColor'] = getStatusColor(phStatus);
 
         sensorData[2]['value'] = '${data['nitrogen'] ?? '-'} ppm';
-        sensorData[2]['status'] = '-';
-        sensorData[2]['statusColor'] = Colors.grey;
+        sensorData[2]['status'] = nitrogenStatus;
+        sensorData[2]['statusColor'] = getStatusColor(nitrogenStatus);
 
         sensorData[3]['value'] = '${soilMoisture.toStringAsFixed(1)}%';
         sensorData[3]['status'] = moistStatus;
         sensorData[3]['statusColor'] = getStatusColor(moistStatus);
 
         sensorData[4]['value'] = '${data['potassium'] ?? '-'} ppm';
-        sensorData[4]['status'] = '-';
-        sensorData[4]['statusColor'] = Colors.grey;
+        sensorData[4]['status'] = kaliumStatus;
+        sensorData[4]['statusColor'] = getStatusColor(kaliumStatus);
 
         sensorData[5]['value'] = '${data['phosphorus'] ?? '-'} ppm';
-        sensorData[5]['status'] = '-';
-        sensorData[5]['statusColor'] = Colors.grey;
+        sensorData[5]['status'] = phosporStatus;
+        sensorData[5]['statusColor'] = getStatusColor(phosporStatus);
       });
     }
   }
@@ -309,26 +315,26 @@ class _HomePageState extends State<HomePage> {
                       } else if (title == "pH") {
                         Navigator.push(context,
                             MaterialPageRoute(builder: (_) => SensorPhPage()));
-                      } else if (title == "Kalium") {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => SensorKaliumPage()));
-                      } else if (title == "Soil Moisture") {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => SensorKelembabanPage()));
-                      } else if (title == "Phospor") {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => SensorPhosporPage()));
                       } else if (title == "Nitrogen") {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (_) => SensorNitrogenPage()));
+                      } else if (title == "Soil Moisture") {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => SensorKelembabanPage()));
+                      } else if (title == "Kalium") {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => SensorKaliumPage()));
+                      } else if (title == "Phospor") {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => SensorPhosporPage()));
                       }
                     },
                   );
@@ -692,13 +698,18 @@ String getStatus(String type, double value) {
       if (value <= 7.5) return "Subur";
       if (value <= 8) return "Kurang Subur";
       return "Tidak Subur";
-    case "Phosphorus":
+    case "Phospor":
       if (value < 5.5) return "Tidak Subur";
       if (value < 6) return "Kurang Subur";
       if (value <= 7.5) return "Subur";
       if (value <= 8) return "Kurang Subur";
       return "Tidak Subur";
-
+    case "Kalium":
+      if (value < 5.5) return "Tidak Subur";
+      if (value < 6) return "Kurang Subur";
+      if (value <= 7.5) return "Subur";
+      if (value <= 8) return "Kurang Subur";
+      return "Tidak Subur";
     default:
       return "-";
   }
