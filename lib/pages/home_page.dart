@@ -686,6 +686,19 @@ String getStatus(String type, double value) {
       if (value <= 7.5) return "Subur";
       if (value <= 8) return "Kurang Subur";
       return "Tidak Subur";
+    case "Nitrogen":
+      if (value < 5.5) return "Tidak Subur";
+      if (value < 6) return "Kurang Subur";
+      if (value <= 7.5) return "Subur";
+      if (value <= 8) return "Kurang Subur";
+      return "Tidak Subur";
+    case "Phosphorus":
+      if (value < 5.5) return "Tidak Subur";
+      if (value < 6) return "Kurang Subur";
+      if (value <= 7.5) return "Subur";
+      if (value <= 8) return "Kurang Subur";
+      return "Tidak Subur";
+
     default:
       return "-";
   }
