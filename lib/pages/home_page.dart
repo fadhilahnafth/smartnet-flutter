@@ -204,78 +204,138 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFEAEAE3),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundImage: FirebaseAuth.instance.currentUser?.photoURL !=
-                      null
-                  ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!)
-                  : null,
-              backgroundColor: Colors.grey[300],
-              child: FirebaseAuth.instance.currentUser?.photoURL == null
-                  ? Icon(Icons.person, color: Colors.black)
-                  : null,
-            ),
-            SizedBox(width: 20),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      // appBar: AppBar(
+      //   backgroundColor: Colors.white,
+      //   elevation: 0,
+      //   title: Row(
+      //     children: [
+      //       CircleAvatar(
+      //         backgroundImage: FirebaseAuth.instance.currentUser?.photoURL !=
+      //                 null
+      //             ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!)
+      //             : null,
+      //         backgroundColor: Colors.grey[300],
+      //         child: FirebaseAuth.instance.currentUser?.photoURL == null
+      //             ? Icon(Icons.person, color: Colors.black)
+      //             : null,
+      //       ),
+      //       SizedBox(width: 25),
+      //       Column(
+      //         crossAxisAlignment: CrossAxisAlignment.start,
+      //         children: [
+      //           Text("Selamat Datang",
+      //               style: TextStyle(color: Colors.black, fontSize: 14)),
+      //           Text(
+      //               FirebaseAuth.instance.currentUser?.displayName ??
+      //                   "Pengguna",
+      //               style: TextStyle(
+      //                   color: Colors.black,
+      //                   fontSize: 16,
+      //                   fontWeight: FontWeight.bold)),
+      //         ],
+      //       ),
+      //     ],
+      //   ),
+      // ),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(75), // UBAH tinggi sesuai keinginan
+        child: SafeArea(
+          child: Container(
+            color: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
               children: [
-                Text("Selamat Datang",
-                    style: TextStyle(color: Colors.black, fontSize: 14)),
-                Text(
-                    FirebaseAuth.instance.currentUser?.displayName ??
-                        "Pengguna",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold)),
+                CircleAvatar(
+                  radius: 24,
+                  backgroundImage:
+                      FirebaseAuth.instance.currentUser?.photoURL != null
+                          ? NetworkImage(
+                              FirebaseAuth.instance.currentUser!.photoURL!)
+                          : null,
+                  backgroundColor: Colors.grey[300],
+                  child: FirebaseAuth.instance.currentUser?.photoURL == null
+                      ? Icon(Icons.person, color: Colors.black)
+                      : null,
+                ),
+                SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Tengah vertikal
+                  children: [
+                    Text("Selamat Datang",
+                        style: TextStyle(color: Colors.black, fontSize: 14)),
+                    Text(
+                      FirebaseAuth.instance.currentUser?.displayName ??
+                          "Pengguna",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
       ),
+
       body: Padding(
-        padding: EdgeInsets.all(16),
-        child: GridView.builder(
-          itemCount: 6,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1,
-          ),
-          itemBuilder: (context, index) {
-            return SensorCard(
-              sensor: sensorData[index],
-              onTap: () {
-                String title = sensorData[index]["title"];
-                if (title == "Temperature") {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => SensorSuhuPage()));
-                } else if (title == "pH") {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => SensorPhPage()));
-                } else if (title == "Kalium") {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => SensorKaliumPage()));
-                } else if (title == "Soil Moisture") {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => SensorKelembabanPage()));
-                } else if (title == "Phospor") {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => SensorPhosporPage()));
-                } else if (title == "Nitrogen") {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => SensorNitrogenPage()));
-                }
-              },
-            );
-          },
+        // padding: EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: [
+            SizedBox(height: 30), // JARAK ANTARA HEADER DENGAN GRID
+            Expanded(
+              child: GridView.builder(
+                itemCount: 6,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1,
+                ),
+                itemBuilder: (context, index) {
+                  return SensorCard(
+                    sensor: sensorData[index],
+                    onTap: () {
+                      String title = sensorData[index]["title"];
+                      if (title == "Temperature") {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => SensorSuhuPage()));
+                      } else if (title == "pH") {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => SensorPhPage()));
+                      } else if (title == "Kalium") {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => SensorKaliumPage()));
+                      } else if (title == "Soil Moisture") {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => SensorKelembabanPage()));
+                      } else if (title == "Phospor") {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => SensorPhosporPage()));
+                      } else if (title == "Nitrogen") {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => SensorNitrogenPage()));
+                      }
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -572,7 +632,7 @@ class SensorCard extends StatelessWidget {
               ),
             ),
 
-            // Detail Bar
+            // // Detail Bar
             Positioned(
               bottom: 0,
               left: 0,
@@ -667,8 +727,8 @@ List<Map<String, dynamic>> sensorData = [
     "statusOffsetY": 95.0,
     "detail": "detail",
     "detailFontSize": 13.0,
-    "detailOffsetX": 105.0,
-    "detailOffsetY": 120.0,
+    "detailOffsetX": 5.0,
+    "detailOffsetY": 100.0,
     "page": SensorSuhuPage(),
   },
   {
