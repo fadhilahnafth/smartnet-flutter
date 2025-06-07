@@ -266,6 +266,7 @@ class _HomePageState extends State<HomePage> {
   //     }
   //   });
   // }
+
   void connectToSocket() {
     print("Trying to connect to socket.io...");
 
@@ -277,81 +278,40 @@ class _HomePageState extends State<HomePage> {
     socket!.onConnect((_) {
       print("✅ Connected to socket.io");
       Fluttertoast.showToast(
-        msg: "🔌 Perangkat tersambung",
+        msg: " Perangkat tersambung",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
     });
 
     socket!.onDisconnect((_) {
-      print("⚠️ Socket disconnected");
+      print("Socket disconnected");
       Fluttertoast.showToast(
-        msg: "⚠️ Perangkat terputus",
+        msg: "Perangkat terputus",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
     });
 
     socket!.onConnectError((err) {
-      print("❌ Socket connect error: $err");
+      print("Socket connect error: $err");
     });
 
     socket!.onError((err) {
-      print("❌ Socket error: $err");
+      print("Socket error: $err");
     });
 
-    socket!.on('stream-uplink-p2p', (data) {
-      print("📡 Received send-uplink-p2p: $data");
+    socket!.on('send-uplink-p2p', (data) {
+      print("Received send-uplink-p2p: $data");
       if (data is Map<String, dynamic>) {
         updateSensorData(data);
         Fluttertoast.showToast(
-          msg: "⚠️ Menerima Data",
+          msg: "Menerima Data",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
         );
       }
     });
-  }
-
-  // void updateSensorData(Map<String, dynamic> data) {
-  //   final double temperature = (data['uplink']['temperature'] ?? 0).toDouble();
-  //   final double soilMoisture = (data['uplink']['humidity'] ?? 0).toDouble();
-  //   final double ph = (data['ph'] ?? 0).toDouble();
-  //   final double nitrogen = (data['uplink']['nitrogen'] ?? 0).toDouble();
-  //   final double kalium = (data['uplink']['potassium'] ?? 0).toDouble();
-  //   final double phospor = (data['uplink']['phossporus'] ?? 0).toDouble();
-
-  //   setState(() {
-  //     sensorData[0]['value'] = '${temperature.toStringAsFixed(1)}°C';
-  //     sensorData[0]['status'] = getStatus("Temperature", temperature);
-  //     sensorData[0]['statusColor'] = getStatusColor(sensorData[0]['status']);
-
-  //     sensorData[1]['value'] = '${ph.toStringAsFixed(1)}';
-  //     sensorData[1]['status'] = getStatus("pH", ph);
-  //     sensorData[1]['statusColor'] = getStatusColor(sensorData[1]['status']);
-
-  //     sensorData[2]['value'] = '${nitrogen.toStringAsFixed(1)}';
-  //     sensorData[2]['status'] = getStatus("Nitrogen", nitrogen);
-  //     sensorData[2]['statusColor'] = getStatusColor(sensorData[2]['status']);
-
-  //     sensorData[3]['value'] = '${soilMoisture.toStringAsFixed(1)}%';
-  //     sensorData[3]['status'] = getStatus("Soil Moisture", soilMoisture);
-  //     sensorData[3]['statusColor'] = getStatusColor(sensorData[3]['status']);
-
-  //     sensorData[4]['value'] = '$kalium ppm';
-  //     sensorData[4]['status'] = getStatus("Kalium", kalium);
-  //     sensorData[4]['statusColor'] = getStatusColor(sensorData[4]['status']);
-
-  //     sensorData[5]['value'] = '$phospor ppm';
-  //     sensorData[5]['status'] = getStatus("Phospor", phospor);
-  //     sensorData[5]['statusColor'] = getStatusColor(sensorData[5]['status']);
-  //   });
-  // }
-  double parseToDouble(dynamic value) {
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    if (value is String) return double.tryParse(value) ?? 0.0;
-    return 0.0;
   }
 
   void updateSensorData(Map<String, dynamic> data) {
@@ -392,14 +352,87 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void resetSensorData() {
+    setState(() {
+      sensorData[0]['value'] = '0°C';
+      sensorData[1]['value'] = '0';
+      sensorData[2]['value'] = '0';
+      sensorData[3]['value'] = '0%';
+      sensorData[4]['value'] = '0 ppm';
+      sensorData[5]['value'] = '0 ppm';
+
+      for (var item in sensorData) {
+        item['status'] = 'Normal';
+        item['statusColor'] = Colors.grey;
+      }
+    });
+  }
+
+  // void updateSensorData(Map<String, dynamic> data) {
+  //   final uplink = data['uplink'] ?? {};
+
+  //   final double temperature = parseToDouble(uplink['temperature']);
+  //   final double soilMoisture = parseToDouble(uplink['humidity']);
+  //   final double ph = parseToDouble(uplink['ph']);
+  //   final double nitrogen = parseToDouble(uplink['nitrogen']);
+  //   final double kalium = parseToDouble(uplink['potassium']);
+  //   final double phospor = parseToDouble(
+  //       uplink['phossporus']); // pastikan key-nya memang "phossporus"
+
+  //   setState(() {
+  //     sensorData[0]['value'] = '${temperature.toStringAsFixed(1)}°C';
+  //     sensorData[0]['status'] = getStatus("Temperature", temperature);
+  //     sensorData[0]['statusColor'] = getStatusColor(sensorData[0]['status']);
+
+  //     sensorData[1]['value'] = '${ph.toStringAsFixed(1)}';
+  //     sensorData[1]['status'] = getStatus("pH", ph);
+  //     sensorData[1]['statusColor'] = getStatusColor(sensorData[1]['status']);
+
+  //     sensorData[2]['value'] = '${nitrogen.toStringAsFixed(1)}';
+  //     sensorData[2]['status'] = getStatus("Nitrogen", nitrogen);
+  //     sensorData[2]['statusColor'] = getStatusColor(sensorData[2]['status']);
+
+  //     sensorData[3]['value'] = '${soilMoisture.toStringAsFixed(1)}%';
+  //     sensorData[3]['status'] = getStatus("Soil Moisture", soilMoisture);
+  //     sensorData[3]['statusColor'] = getStatusColor(sensorData[3]['status']);
+
+  //     sensorData[4]['value'] = '$kalium ppm';
+  //     sensorData[4]['status'] = getStatus("Kalium", kalium);
+  //     sensorData[4]['statusColor'] = getStatusColor(sensorData[4]['status']);
+
+  //     sensorData[5]['value'] = '$phospor ppm';
+  //     sensorData[5]['status'] = getStatus("Phospor", phospor);
+  //     sensorData[5]['statusColor'] = getStatusColor(sensorData[5]['status']);
+  //   });
+  // }
+
+  double parseToDouble(dynamic value) {
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
   Future<void> _handleRefresh() async {
-    // Anda bisa trigger ulang koneksi atau ambil data baru jika diperlukan
-    // Contoh sederhana:
+    print('Refreshing socket connection...');
+
+    // Disconnect if already connected
+    if (socket != null) {
+      socket!.disconnect();
+      socket!.clearListeners();
+    }
+
+    // Reconnect
+    connectToSocket();
+    resetSensorData();
+
     Fluttertoast.showToast(
       msg: "Memuat ulang data...",
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
     );
+
+    await Future.delayed(Duration(seconds: 1)); // untuk animasi refresh
   }
 
   @override
@@ -775,7 +808,7 @@ List<Map<String, dynamic>> sensorData = [
     "titleOffsetX": 15.0,
     "titleOffsetY": 10.0,
     "underline": false,
-    "status": "status",
+    "status": "-",
     "statusFontSize": 15.0,
     "statusOffsetX": 30.0,
     "statusOffsetY": 95.0,
@@ -798,7 +831,7 @@ List<Map<String, dynamic>> sensorData = [
     "titleFontSize": 12.0,
     "titleOffsetX": 15.0,
     "titleOffsetY": 10.0,
-    "status": "status",
+    "status": "-",
     "statusFontSize": 15.0,
     "statusOffsetX": 30.0,
     "statusOffsetY": 95.0,
@@ -822,7 +855,7 @@ List<Map<String, dynamic>> sensorData = [
     "titleOffsetX": 15.0,
     "titleOffsetY": 10.0,
     "titleColor": Colors.purple,
-    "status": "SUBUR",
+    "status": "-",
     "statusFontSize": 15.0,
     "statusOffsetX": 30.0,
     "statusOffsetY": 95.0,
@@ -845,7 +878,7 @@ List<Map<String, dynamic>> sensorData = [
     "titleOffsetX": 15.0,
     "titleOffsetY": 10.0,
     "titleColor": Colors.brown,
-    "status": "status",
+    "status": "-",
     "statusFontSize": 15.0,
     "statusOffsetX": 30.0,
     "statusOffsetY": 95.0,
@@ -869,7 +902,7 @@ List<Map<String, dynamic>> sensorData = [
     "titleOffsetX": 15.0,
     "titleOffsetY": 10.0,
     "titleColor": Colors.green,
-    "status": "KURANG\nSUBUR",
+    "status": "-",
     "statusFontSize": 15.0,
     "statusOffsetX": 30.0,
     "statusOffsetY": 95.0,
@@ -893,7 +926,7 @@ List<Map<String, dynamic>> sensorData = [
     "titleOffsetY": 10.0,
     "titleFontSize": 15.0,
     "titleColor": Colors.purple,
-    "status": "SUBUR",
+    "status": "-",
     "statusFontSize": 15.0,
     "statusOffsetX": 30.0,
     "statusOffsetY": 95.0,

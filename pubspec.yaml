@@ -49,6 +49,8 @@ dependencies:
   google_sign_in: ^6.1.4
   socket_io_client: ^3.1.2
   fluttertoast: ^8.2.12
+  flutter_local_notifications: ^19.2.1
+  open_file: ^3.5.10
 
 dev_dependencies:
   flutter_test:
