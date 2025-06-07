@@ -6,7 +6,7 @@ import 'package:smart_agriculture_jadi/pages/sensor_ph.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_phospor.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_suhu.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -350,6 +350,35 @@ class _HomePageState extends State<HomePage> {
       sensorData[5]['status'] = getStatus("Phospor", phospor);
       sensorData[5]['statusColor'] = getStatusColor(sensorData[5]['status']);
     });
+    checkAndSendMessage("Temperature", sensorData[0]['status']);
+    checkAndSendMessage("pH", sensorData[1]['status']);
+    checkAndSendMessage("Nitrogen", sensorData[2]['status']);
+    checkAndSendMessage("Soil Moisture", sensorData[3]['status']);
+    checkAndSendMessage("Kalium", sensorData[4]['status']);
+    checkAndSendMessage("Phospor", sensorData[5]['status']);
+  }
+
+  Future<void> checkAndSendMessage(String sensorName, String status) async {
+    if (status != "Tidak Subur") return;
+
+    final now = DateTime.now();
+    final docRef =
+        FirebaseFirestore.instance.collection('messages').doc(sensorName);
+    final doc = await docRef.get();
+
+    final lastSent =
+        doc.exists ? (doc['lastSent'] as Timestamp).toDate() : DateTime(2000);
+    final difference = now.difference(lastSent);
+
+    if (difference.inMinutes >= 1) {
+      await docRef.set({
+        'sensorName': sensorName,
+        'message': 'Sensor $sensorName tidak subur.',
+        'timestamp': Timestamp.now(),
+        'lastSent': Timestamp.now(),
+      }, SetOptions(merge: true));
+      print("Pesan dikirim untuk sensor $sensorName");
+    }
   }
 
   void resetSensorData() {
