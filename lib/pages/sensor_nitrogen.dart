@@ -1912,9 +1912,9 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
         //     .orderBy('metadata.timestamp', descending: true)
         //     .get(),
         future: uplinksRef
-            .orderBy('metadata.timestamp', descending: true)
-            .where('metadata.timestamp', isGreaterThanOrEqualTo: startEpoch)
-            .where('metadata.timestamp', isLessThan: endEpoch)
+            .orderBy('timestamp', descending: true)
+            .where('timestamp', isGreaterThanOrEqualTo: startEpoch)
+            .where('timestamp', isLessThan: endEpoch)
             .get(),
 
         builder: (context, snapshot) {
@@ -1931,14 +1931,27 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
           List<FlSpot> nitrogenPoints = [];
 
           for (int i = 0; i < docs.length; i++) {
-            // final time =
-            //     (docs[i]['metadata']['timestamp'] as Timestamp).toDate();
-            final timestampMillis = docs[i]['metadata']['timestamp'] as int;
-            final time = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
+            //   // final time =
+            //   //     (docs[i]['metadata']['timestamp'] as Timestamp).toDate();
+            //   // final timestampMillis = docs[i]['metadata']['timestamp'] as int;
+            //   // final time = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
+            //   final timestamp = docs[i]['timestamp'] ?? 0;
+            //   final time = DateTime.fromMillisecondsSinceEpoch(timestamp);
 
+            //   final hour = time.hour.toDouble();
+            //   final value = (docs[i]['uplink']['nitrogen']);
+            //   nitrogenPoints.add(FlSpot(hour, value));
+            // }
+            final data = docs[i].data() as Map<String, dynamic>;
+            final timestamp = data['timestamp'] ?? 0;
+            final time = DateTime.fromMillisecondsSinceEpoch(timestamp);
             final hour = time.hour.toDouble();
-            final value = (docs[i]['uplink']['nitrogen']);
-            nitrogenPoints.add(FlSpot(hour, value));
+
+            final uplink = data['uplink'] ?? {};
+            final nitrogenValue =
+                double.tryParse(uplink['nitrogen']?.toString() ?? '') ?? 0.0;
+
+            nitrogenPoints.add(FlSpot(hour, nitrogenValue));
           }
 
           if (!hasData) {
@@ -2067,7 +2080,7 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                               minX: 0,
                               maxX: 23,
                               minY: 0,
-                              maxY: 200,
+                              maxY: 100,
                               backgroundColor: Colors.white,
                               lineTouchData: LineTouchData(
                                 touchTooltipData: LineTouchTooltipData(
@@ -2099,7 +2112,7 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                                 leftTitles: AxisTitles(
                                   sideTitles: SideTitles(
                                     showTitles: true,
-                                    interval: 20,
+                                    interval: 10,
                                     getTitlesWidget: (value, meta) => Text(
                                       '${value.toInt()}',
                                       style: TextStyle(fontSize: yAxisFontSize),
