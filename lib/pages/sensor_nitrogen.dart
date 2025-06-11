@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
+// import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:flutter/material.dart';
+// import 'package:intl/intl.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 // class SensorNitrogenPage extends StatelessWidget {
 //   final CollectionReference uplinksRef =
@@ -163,6 +166,1663 @@ import 'package:fl_chart/fl_chart.dart';
 //   }
 // }
 
+// //Progres hampir
+// class SensorNitrogenPage extends StatefulWidget {
+//   @override
+//   _SensorNitrogenPageState createState() => _SensorNitrogenPageState();
+// }
+
+// class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
+//   final CollectionReference uplinksRef =
+//       FirebaseFirestore.instance.collection('uplinks');
+
+//   int _selectedHours = 24;
+//   double xAxisFontSize = 12;
+//   double yAxisFontSize = 12;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: const Color(0xFFEAEAE3),
+//       appBar: AppBar(
+//         backgroundColor: Colors.white,
+//         title: const Text("Detail Sensor Nitrogen",
+//             style: TextStyle(color: Colors.black)),
+//         iconTheme: const IconThemeData(color: Colors.black),
+//         elevation: 0,
+//       ),
+//       body: FutureBuilder<QuerySnapshot>(
+//         future: uplinksRef
+//             .orderBy('createdAt', descending: true)
+//             .limit(_selectedHours)
+//             .get(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//           if (snapshot.hasError) {
+//             return Center(child: Text('Terjadi error: ${snapshot.error}'));
+//           }
+
+//           final docs = snapshot.data?.docs ?? [];
+//           if (docs.isEmpty) {
+//             return const Center(child: Text('Data tidak ditemukan'));
+//           }
+
+//           final double latestTemp = docs.first['nitrogen']?.toDouble() ?? 0.0;
+
+//           List<FlSpot> suhuPoints = [];
+//           for (int i = 0; i < docs.length; i++) {
+//             final temp = docs[i]['nitrogen']?.toDouble() ?? 0.0;
+//             suhuPoints.add(FlSpot(i.toDouble(), temp));
+//           }
+
+//           return SingleChildScrollView(
+//             padding: const EdgeInsets.all(16),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.center,
+//               children: [
+//                 // Temperature box with info icon and centered text
+//                 Container(
+//                   width: double.infinity,
+//                   padding: const EdgeInsets.all(16),
+//                   decoration: BoxDecoration(
+//                     color: Colors.white,
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: Stack(
+//                     children: [
+//                       Align(
+//                         alignment: Alignment.center,
+//                         child: Column(
+//                           mainAxisSize: MainAxisSize.min,
+//                           children: [
+//                             Text("Nitrogen",
+//                                 style: TextStyle(
+//                                     fontSize: 20, fontWeight: FontWeight.bold)),
+//                             Text("${latestTemp.toStringAsFixed(2)} ppm",
+//                                 style: TextStyle(
+//                                     fontSize: 18, color: Colors.teal)),
+//                           ],
+//                         ),
+//                       ),
+//                       Positioned(
+//                         top: 0,
+//                         right: 0,
+//                         child: IconButton(
+//                           icon: Icon(Icons.info_outline, color: Colors.teal),
+//                           onPressed: () {
+//                             showDialog(
+//                               context: context,
+//                               builder: (_) => AlertDialog(
+//                                 title: Text("Indikator Nitrogen"),
+//                                 content: Column(
+//                                   mainAxisSize: MainAxisSize.min,
+//                                   children: [
+//                                     Container(
+//                                       decoration: BoxDecoration(
+//                                         color: Colors.grey[300],
+//                                         borderRadius: BorderRadius.only(
+//                                           topLeft: Radius.circular(50),
+//                                           topRight: Radius.circular(50),
+//                                         ),
+//                                       ),
+//                                       child: Table(
+//                                         columnWidths: const {
+//                                           0: FlexColumnWidth(2),
+//                                           1: FlexColumnWidth(2),
+//                                         },
+//                                         children: [
+//                                           TableRow(
+//                                             decoration: BoxDecoration(
+//                                                 color: Colors.grey[300]),
+//                                             children: [
+//                                               Padding(
+//                                                 padding:
+//                                                     const EdgeInsets.all(8.0),
+//                                                 child: Text('Indikator',
+//                                                     style: TextStyle(
+//                                                         fontWeight:
+//                                                             FontWeight.bold,
+//                                                         color: Colors.black)),
+//                                               ),
+//                                               Padding(
+//                                                 padding:
+//                                                     const EdgeInsets.all(8.0),
+//                                                 child: Text('Nitrogen',
+//                                                     style: TextStyle(
+//                                                         fontWeight:
+//                                                             FontWeight.bold,
+//                                                         color: Colors.black)),
+//                                               ),
+//                                             ],
+//                                           ),
+//                                         ],
+//                                       ),
+//                                     ),
+//                                     Table(
+//                                       border: TableBorder.symmetric(
+//                                         inside: BorderSide(
+//                                             color: Colors.grey.shade300),
+//                                         outside: BorderSide(
+//                                             color: Colors.grey.shade400),
+//                                       ),
+//                                       columnWidths: const {
+//                                         0: FlexColumnWidth(2),
+//                                         1: FlexColumnWidth(2),
+//                                       },
+//                                       children: [
+//                                         _buildRow("Tidak Subur", "0 - 5"),
+//                                         _buildRow("Kurang Subur", "5,5 - 6"),
+//                                         _buildRow("Subur", "6 - 7,5"),
+//                                         _buildRow("Kurang Subur", "7,6 - 8"),
+//                                         _buildRow("Tidak Subur", "8 - 14"),
+//                                       ],
+//                                     ),
+//                                   ],
+//                                 ),
+//                                 actions: [
+//                                   TextButton(
+//                                     child: Text("Tutup"),
+//                                     onPressed: () => Navigator.pop(context),
+//                                   )
+//                                 ],
+//                               ),
+//                             );
+//                           },
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 const SizedBox(height: 30),
+//                 // Grafik Sensor Suhu Title and Dropdown inside box
+//                 // Grafik Box
+//                 Card(
+//                   shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(12)),
+//                   elevation: 2,
+//                   color: Colors.white,
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(16.0),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                           children: [
+//                             const Text("Grafik Sensor Nitrogen",
+//                                 style: TextStyle(
+//                                     fontWeight: FontWeight.bold, fontSize: 16)),
+//                             DropdownButton<int>(
+//                               value: _selectedHours,
+//                               onChanged: (int? newValue) {
+//                                 if (newValue != null) {
+//                                   setState(() {
+//                                     _selectedHours = newValue;
+//                                   });
+//                                 }
+//                               },
+//                               items: const [
+//                                 DropdownMenuItem(
+//                                     value: 12, child: Text("12 Jam")),
+//                                 DropdownMenuItem(
+//                                     value: 24, child: Text("24 Jam")),
+//                                 DropdownMenuItem(
+//                                     value: 48, child: Text("2 Hari")),
+//                               ],
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 10),
+//                         SizedBox(
+//                           height: 300,
+//                           child: LineChart(
+//                             LineChartData(
+//                               minX: 0,
+//                               maxX: _selectedHours.toDouble() - 1,
+//                               minY: 0,
+//                               maxY: 200,
+//                               backgroundColor: Colors.white,
+//                               lineTouchData: LineTouchData(
+//                                 touchTooltipData: LineTouchTooltipData(
+//                                   tooltipBgColor:
+//                                       Colors.blueGrey.withOpacity(0.7),
+//                                   getTooltipItems: (touchedSpots) {
+//                                     return touchedSpots.map((spot) {
+//                                       return LineTooltipItem(
+//                                         '${spot.y.toStringAsFixed(1)}',
+//                                         const TextStyle(color: Colors.white),
+//                                       );
+//                                     }).toList();
+//                                   },
+//                                 ),
+//                                 handleBuiltInTouches: true,
+//                                 enabled: true,
+//                               ),
+//                               gridData: FlGridData(
+//                                 show: false,
+//                                 drawVerticalLine: true,
+//                                 drawHorizontalLine: true,
+//                                 getDrawingHorizontalLine: (value) => FlLine(
+//                                   color: Colors.grey.shade300,
+//                                   strokeWidth: 1,
+//                                 ),
+//                                 getDrawingVerticalLine: (value) => FlLine(
+//                                   color: Colors.grey.shade300,
+//                                   strokeWidth: 1,
+//                                 ),
+//                               ),
+//                               titlesData: FlTitlesData(
+//                                 bottomTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 4,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                       '${value.toInt()}',
+//                                       style: TextStyle(fontSize: xAxisFontSize),
+//                                     ),
+//                                   ),
+//                                 ),
+//                                 leftTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 20,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                       '${value.toInt()}',
+//                                       style: TextStyle(fontSize: yAxisFontSize),
+//                                     ),
+//                                   ),
+//                                 ),
+//                                 topTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                                 rightTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                               ),
+//                               borderData: FlBorderData(show: false),
+//                               lineBarsData: [
+//                                 LineChartBarData(
+//                                   spots: suhuPoints,
+//                                   isCurved: true,
+//                                   isStrokeCapRound: true,
+//                                   barWidth: 4,
+//                                   gradient: const LinearGradient(
+//                                     colors: [Colors.teal, Colors.green],
+//                                   ),
+//                                   dotData: FlDotData(show: true),
+//                                   belowBarData: BarAreaData(
+//                                     show: true,
+//                                     gradient: LinearGradient(
+//                                       colors: [
+//                                         Colors.teal.withOpacity(0.3),
+//                                         Colors.green.withOpacity(0.2),
+//                                       ],
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ],
+//                               clipData: FlClipData.all(),
+//                               showingTooltipIndicators: [],
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   TableRow _buildRow(String indikator, String rentang,
+//       {bool isHeader = false}) {
+//     return TableRow(children: [
+//       _buildCell(indikator, isHeader: isHeader),
+//       _buildCell(rentang, isHeader: isHeader),
+//     ]);
+//   }
+
+//   Widget _buildCell(String text, {bool isHeader = false}) {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: Text(
+//         text,
+//         style: TextStyle(
+//           fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+//           color: isHeader ? Colors.black : Colors.grey[800],
+//         ),
+//         textAlign: TextAlign.center,
+//       ),
+//     );
+//   }
+// }
+
+// //
+
+// class SensorNitrogenPage extends StatefulWidget {
+//   @override
+//   _SensorNitrogenPageState createState() => _SensorNitrogenPageState();
+// }
+
+// class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
+//   final CollectionReference uplinksRef =
+//       FirebaseFirestore.instance.collection('uplinks');
+
+//   DateTime? _selectedDate;
+//   double xAxisFontSize = 12;
+//   double yAxisFontSize = 12;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: const Color(0xFFEAEAE3),
+//       appBar: AppBar(
+//         backgroundColor: Colors.white,
+//         title: const Text("Detail Sensor Nitrogen",
+//             style: TextStyle(color: Colors.black)),
+//         iconTheme: const IconThemeData(color: Colors.black),
+//         elevation: 0,
+//       ),
+//       body: FutureBuilder<QuerySnapshot>(
+//         future: _selectedDate == null
+//             ? null
+//             : uplinksRef
+//                 .where(
+//                   'timestamp',
+//                   isGreaterThanOrEqualTo: Timestamp.fromDate(
+//                     DateTime(_selectedDate!.year, _selectedDate!.month,
+//                         _selectedDate!.day),
+//                   ),
+//                 )
+//                 .where(
+//                   'timestamp',
+//                   isLessThan: Timestamp.fromDate(
+//                     DateTime(_selectedDate!.year, _selectedDate!.month,
+//                             _selectedDate!.day)
+//                         .add(Duration(days: 1)),
+//                   ),
+//                 )
+//                 .orderBy('timestamp')
+//                 .get(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//           if (snapshot.hasError) {
+//             return Center(child: Text('Terjadi error: ${snapshot.error}'));
+//           }
+
+//           final docs = snapshot.data?.docs ?? [];
+
+//           if (_selectedDate == null) {
+//             return const Center(
+//                 child: Text('Silakan pilih tanggal terlebih dahulu'));
+//           }
+
+//           if (docs.isEmpty) {
+//             return const Center(child: Text('Data tidak ditemukan'));
+//           }
+
+//           final double latestTemp = docs.first['nitrogen']?.toDouble() ?? 0.0;
+
+//           List<FlSpot> suhuPoints = [];
+//           for (int i = 0; i < docs.length; i++) {
+//             final temp = docs[i]['nitrogen']?.toDouble() ?? 0.0;
+//             suhuPoints.add(FlSpot(i.toDouble(), temp));
+//           }
+
+//           return SingleChildScrollView(
+//             padding: const EdgeInsets.all(16),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.center,
+//               children: [
+//                 Container(
+//                   width: double.infinity,
+//                   padding: const EdgeInsets.all(16),
+//                   decoration: BoxDecoration(
+//                     color: Colors.white,
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: Stack(
+//                     children: [
+//                       Align(
+//                         alignment: Alignment.center,
+//                         child: Column(
+//                           mainAxisSize: MainAxisSize.min,
+//                           children: [
+//                             const Text("Nitrogen",
+//                                 style: TextStyle(
+//                                     fontSize: 20, fontWeight: FontWeight.bold)),
+//                             Text("${latestTemp.toStringAsFixed(2)} ppm",
+//                                 style: const TextStyle(
+//                                     fontSize: 18, color: Colors.teal)),
+//                           ],
+//                         ),
+//                       ),
+//                       Positioned(
+//                         top: 0,
+//                         right: 0,
+//                         child: IconButton(
+//                           icon: const Icon(Icons.info_outline,
+//                               color: Colors.teal),
+//                           onPressed: () {
+//                             showDialog(
+//                               context: context,
+//                               builder: (_) => AlertDialog(
+//                                 title: const Text("Indikator Nitrogen"),
+//                                 content: Column(
+//                                   mainAxisSize: MainAxisSize.min,
+//                                   children: [
+//                                     Container(
+//                                       decoration: BoxDecoration(
+//                                         color: Colors.grey[300],
+//                                         borderRadius: const BorderRadius.only(
+//                                           topLeft: Radius.circular(50),
+//                                           topRight: Radius.circular(50),
+//                                         ),
+//                                       ),
+//                                       child: Table(
+//                                         columnWidths: const {
+//                                           0: FlexColumnWidth(2),
+//                                           1: FlexColumnWidth(2),
+//                                         },
+//                                         children: [
+//                                           TableRow(
+//                                             decoration: BoxDecoration(
+//                                                 color: Colors.grey[300]),
+//                                             children: const [
+//                                               Padding(
+//                                                 padding: EdgeInsets.all(8.0),
+//                                                 child: Text('Indikator',
+//                                                     style: TextStyle(
+//                                                         fontWeight:
+//                                                             FontWeight.bold,
+//                                                         color: Colors.black)),
+//                                               ),
+//                                               Padding(
+//                                                 padding: EdgeInsets.all(8.0),
+//                                                 child: Text('Nitrogen',
+//                                                     style: TextStyle(
+//                                                         fontWeight:
+//                                                             FontWeight.bold,
+//                                                         color: Colors.black)),
+//                                               ),
+//                                             ],
+//                                           ),
+//                                         ],
+//                                       ),
+//                                     ),
+//                                     Table(
+//                                       border: TableBorder.symmetric(
+//                                         inside: BorderSide(
+//                                             color: Colors.grey.shade300),
+//                                         outside: BorderSide(
+//                                             color: Colors.grey.shade400),
+//                                       ),
+//                                       columnWidths: const {
+//                                         0: FlexColumnWidth(2),
+//                                         1: FlexColumnWidth(2),
+//                                       },
+//                                       children: [
+//                                         _buildRow("Tidak Subur", "0 - 5"),
+//                                         _buildRow("Kurang Subur", "5,5 - 6"),
+//                                         _buildRow("Subur", "6 - 7,5"),
+//                                         _buildRow("Kurang Subur", "7,6 - 8"),
+//                                         _buildRow("Tidak Subur", "8 - 14"),
+//                                       ],
+//                                     ),
+//                                   ],
+//                                 ),
+//                                 actions: [
+//                                   TextButton(
+//                                     child: const Text("Tutup"),
+//                                     onPressed: () => Navigator.pop(context),
+//                                   )
+//                                 ],
+//                               ),
+//                             );
+//                           },
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 const SizedBox(height: 30),
+//                 Card(
+//                   shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(12)),
+//                   elevation: 2,
+//                   color: Colors.white,
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(16.0),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                           children: [
+//                             const Text("Grafik Sensor Nitrogen",
+//                                 style: TextStyle(
+//                                     fontWeight: FontWeight.bold, fontSize: 16)),
+//                             TextButton.icon(
+//                               onPressed: () async {
+//                                 DateTime? picked = await showDatePicker(
+//                                   context: context,
+//                                   initialDate: DateTime.now(),
+//                                   firstDate: DateTime(2024),
+//                                   lastDate: DateTime.now(),
+//                                 );
+//                                 if (picked != null) {
+//                                   setState(() {
+//                                     _selectedDate = picked;
+//                                   });
+//                                 }
+//                               },
+//                               icon: const Icon(Icons.calendar_today, size: 16),
+//                               label: Text(_selectedDate == null
+//                                   ? "Pilih Tanggal"
+//                                   : "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}"),
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 10),
+//                         SizedBox(
+//                           height: 300,
+//                           child: LineChart(
+//                             LineChartData(
+//                               minX: 0,
+//                               maxX: suhuPoints.length > 1
+//                                   ? suhuPoints.length.toDouble() - 1
+//                                   : 1,
+//                               minY: 0,
+//                               maxY: 200,
+//                               backgroundColor: Colors.white,
+//                               lineTouchData: LineTouchData(
+//                                 touchTooltipData: LineTouchTooltipData(
+//                                   tooltipBgColor:
+//                                       Colors.blueGrey.withOpacity(0.7),
+//                                   getTooltipItems: (touchedSpots) {
+//                                     return touchedSpots.map((spot) {
+//                                       return LineTooltipItem(
+//                                         '${spot.y.toStringAsFixed(1)}',
+//                                         const TextStyle(color: Colors.white),
+//                                       );
+//                                     }).toList();
+//                                   },
+//                                 ),
+//                                 handleBuiltInTouches: true,
+//                                 enabled: true,
+//                               ),
+//                               gridData: FlGridData(
+//                                 show: false,
+//                                 drawVerticalLine: true,
+//                                 drawHorizontalLine: true,
+//                                 getDrawingHorizontalLine: (value) => FlLine(
+//                                   color: Colors.grey.shade300,
+//                                   strokeWidth: 1,
+//                                 ),
+//                                 getDrawingVerticalLine: (value) => FlLine(
+//                                   color: Colors.grey.shade300,
+//                                   strokeWidth: 1,
+//                                 ),
+//                               ),
+//                               titlesData: FlTitlesData(
+//                                 bottomTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 4,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                       '${value.toInt()}',
+//                                       style: TextStyle(fontSize: xAxisFontSize),
+//                                     ),
+//                                   ),
+//                                 ),
+//                                 leftTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 20,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                       '${value.toInt()}',
+//                                       style: TextStyle(fontSize: yAxisFontSize),
+//                                     ),
+//                                   ),
+//                                 ),
+//                                 topTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                                 rightTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                               ),
+//                               borderData: FlBorderData(show: false),
+//                               lineBarsData: [
+//                                 LineChartBarData(
+//                                   spots: suhuPoints,
+//                                   isCurved: true,
+//                                   isStrokeCapRound: true,
+//                                   barWidth: 4,
+//                                   gradient: const LinearGradient(
+//                                     colors: [Colors.teal, Colors.green],
+//                                   ),
+//                                   dotData: FlDotData(show: true),
+//                                   belowBarData: BarAreaData(
+//                                     show: true,
+//                                     gradient: LinearGradient(
+//                                       colors: [
+//                                         Colors.teal.withOpacity(0.3),
+//                                         Colors.green.withOpacity(0.2),
+//                                       ],
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ],
+//                               clipData: FlClipData.all(),
+//                               showingTooltipIndicators: [],
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   TableRow _buildRow(String indikator, String rentang,
+//       {bool isHeader = false}) {
+//     return TableRow(children: [
+//       _buildCell(indikator, isHeader: isHeader),
+//       _buildCell(rentang, isHeader: isHeader),
+//     ]);
+//   }
+
+//   Widget _buildCell(String text, {bool isHeader = false}) {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: Text(
+//         text,
+//         style: TextStyle(
+//           fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+//           color: isHeader ? Colors.black : Colors.grey[800],
+//         ),
+//         textAlign: TextAlign.center,
+//       ),
+//     );
+//   }
+// }
+
+// class SensorNitrogenPage extends StatefulWidget {
+//   @override
+//   _SensorNitrogenPageState createState() => _SensorNitrogenPageState();
+// }
+
+// class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
+//   final CollectionReference uplinksRef =
+//       FirebaseFirestore.instance.collection('uplinks');
+
+//   DateTime? _selectedDate;
+//   double xAxisFontSize = 12;
+//   double yAxisFontSize = 12;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: const Color(0xFFEAEAE3),
+//       appBar: AppBar(
+//         backgroundColor: Colors.white,
+//         title: const Text("Detail Sensor Nitrogen",
+//             style: TextStyle(color: Colors.black)),
+//         iconTheme: const IconThemeData(color: Colors.black),
+//         elevation: 0,
+//       ),
+//       body: FutureBuilder<QuerySnapshot>(
+//         future: _selectedDate == null
+//             ? uplinksRef.orderBy('createdAt', descending: true).limit(24).get()
+//             : uplinksRef
+//                 .where('createdAt',
+//                     isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(
+//                         _selectedDate!.year,
+//                         _selectedDate!.month,
+//                         _selectedDate!.day)))
+//                 .where('createdAt',
+//                     isLessThan: Timestamp.fromDate(DateTime(_selectedDate!.year,
+//                         _selectedDate!.month, _selectedDate!.day + 1)))
+//                 .orderBy('createdAt', descending: true)
+//                 .get(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//           if (snapshot.hasError) {
+//             return Center(child: Text('Terjadi error: ${snapshot.error}'));
+//           }
+
+//           final docs = snapshot.data?.docs ?? [];
+//           if (docs.isEmpty) {
+//             return const Center(child: Text('Data tidak ditemukan'));
+//           }
+
+//           final double latestNitrogen =
+//               docs.first['nitrogen']?.toDouble() ?? 0.0;
+
+//           List<FlSpot> nitrogenPoints = [];
+//           for (int i = 0; i < docs.length; i++) {
+//             final temp = docs[i]['nitrogen']?.toDouble() ?? 0.0;
+//             nitrogenPoints.add(FlSpot(i.toDouble(), temp));
+//           }
+
+//           return SingleChildScrollView(
+//             padding: const EdgeInsets.all(16),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.center,
+//               children: [
+//                 // Nitrogen Info Box
+//                 Container(
+//                   width: double.infinity,
+//                   padding: const EdgeInsets.all(16),
+//                   decoration: BoxDecoration(
+//                     color: Colors.white,
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: Stack(
+//                     children: [
+//                       Align(
+//                         alignment: Alignment.center,
+//                         child: Column(
+//                           mainAxisSize: MainAxisSize.min,
+//                           children: [
+//                             Text("Nitrogen",
+//                                 style: TextStyle(
+//                                     fontSize: 20, fontWeight: FontWeight.bold)),
+//                             Text("${latestNitrogen.toStringAsFixed(2)} ppm",
+//                                 style: TextStyle(
+//                                     fontSize: 18, color: Colors.teal)),
+//                           ],
+//                         ),
+//                       ),
+//                       Positioned(
+//                         top: 0,
+//                         right: 0,
+//                         child: IconButton(
+//                           icon: Icon(Icons.calendar_today, color: Colors.teal),
+//                           onPressed: () async {
+//                             DateTime? picked = await showDatePicker(
+//                               context: context,
+//                               initialDate: DateTime.now(),
+//                               firstDate: DateTime(2024, 1),
+//                               lastDate: DateTime.now(),
+//                             );
+//                             if (picked != null) {
+//                               setState(() {
+//                                 _selectedDate = picked;
+//                               });
+//                             }
+//                           },
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 const SizedBox(height: 30),
+
+//                 // Grafik Box
+//                 Card(
+//                   shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(12)),
+//                   elevation: 2,
+//                   color: Colors.white,
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(16.0),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         const Text("Grafik Sensor Nitrogen",
+//                             style: TextStyle(
+//                                 fontWeight: FontWeight.bold, fontSize: 16)),
+//                         const SizedBox(height: 10),
+//                         SizedBox(
+//                           height: 300,
+//                           child: LineChart(
+//                             LineChartData(
+//                               minX: 0,
+//                               maxX: nitrogenPoints.length.toDouble() - 1,
+//                               minY: 0,
+//                               maxY: 200,
+//                               backgroundColor: Colors.white,
+//                               lineTouchData: LineTouchData(
+//                                 touchTooltipData: LineTouchTooltipData(
+//                                   tooltipBgColor:
+//                                       Colors.blueGrey.withOpacity(0.7),
+//                                   getTooltipItems: (touchedSpots) {
+//                                     return touchedSpots.map((spot) {
+//                                       return LineTooltipItem(
+//                                         '${spot.y.toStringAsFixed(1)}',
+//                                         const TextStyle(color: Colors.white),
+//                                       );
+//                                     }).toList();
+//                                   },
+//                                 ),
+//                                 handleBuiltInTouches: true,
+//                                 enabled: true,
+//                               ),
+//                               gridData: FlGridData(show: false),
+//                               titlesData: FlTitlesData(
+//                                 bottomTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 4,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                       '${value.toInt()}',
+//                                       style: TextStyle(fontSize: xAxisFontSize),
+//                                     ),
+//                                   ),
+//                                 ),
+//                                 leftTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 20,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                       '${value.toInt()}',
+//                                       style: TextStyle(fontSize: yAxisFontSize),
+//                                     ),
+//                                   ),
+//                                 ),
+//                                 topTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                                 rightTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                               ),
+//                               borderData: FlBorderData(show: false),
+//                               lineBarsData: [
+//                                 LineChartBarData(
+//                                   spots: nitrogenPoints,
+//                                   isCurved: true,
+//                                   isStrokeCapRound: true,
+//                                   barWidth: 4,
+//                                   gradient: const LinearGradient(
+//                                     colors: [Colors.teal, Colors.green],
+//                                   ),
+//                                   dotData: FlDotData(show: true),
+//                                   belowBarData: BarAreaData(
+//                                     show: true,
+//                                     gradient: LinearGradient(
+//                                       colors: [
+//                                         Colors.teal.withOpacity(0.3),
+//                                         Colors.green.withOpacity(0.2),
+//                                       ],
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ],
+//                               clipData: FlClipData.all(),
+//                               showingTooltipIndicators: [],
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
+//}
+//
+///
+///
+///
+
+// class SensorNitrogenPage extends StatefulWidget {
+//   @override
+//   _SensorNitrogenPageState createState() => _SensorNitrogenPageState();
+// }
+
+// class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
+//   final CollectionReference uplinksRef =
+//       FirebaseFirestore.instance.collection('uplinks');
+
+//   double xAxisFontSize = 12;
+//   double yAxisFontSize = 12;
+//   DateTime? _selectedDate;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: const Color(0xFFEAEAE3),
+//       appBar: AppBar(
+//         backgroundColor: Colors.white,
+//         title: const Text("Detail Sensor Nitrogen",
+//             style: TextStyle(color: Colors.black)),
+//         iconTheme: const IconThemeData(color: Colors.black),
+//         elevation: 0,
+//       ),
+//       body: FutureBuilder<QuerySnapshot>(
+//         future: _getData(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//           if (snapshot.hasError) {
+//             return Center(child: Text('Terjadi error: ${snapshot.error}'));
+//           }
+
+//           final docs = snapshot.data?.docs ?? [];
+//           if (docs.isEmpty) {
+//             return const Center(child: Text('Data tidak ditemukan'));
+//           }
+
+//           final double latestValue = docs.first['nitrogen']?.toDouble() ?? 0.0;
+
+//           List<FlSpot> spots = [];
+//           for (int i = 0; i < docs.length; i++) {
+//             final value = docs[i]['nitrogen']?.toDouble() ?? 0.0;
+//             spots.add(FlSpot(i.toDouble(), value));
+//           }
+
+//           return SingleChildScrollView(
+//             padding: const EdgeInsets.all(16),
+//             child: Column(
+//               children: [
+//                 // Box nilai terbaru
+//                 Container(
+//                   width: double.infinity,
+//                   padding: const EdgeInsets.all(16),
+//                   decoration: BoxDecoration(
+//                     color: Colors.white,
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: Stack(
+//                     children: [
+//                       Align(
+//                         alignment: Alignment.center,
+//                         child: Column(
+//                           children: [
+//                             const Text("Nitrogen",
+//                                 style: TextStyle(
+//                                     fontSize: 20, fontWeight: FontWeight.bold)),
+//                             Text("${latestValue.toStringAsFixed(2)} ppm",
+//                                 style: const TextStyle(
+//                                     fontSize: 18, color: Colors.teal)),
+//                           ],
+//                         ),
+//                       ),
+//                       Positioned(
+//                         top: 0,
+//                         right: 0,
+//                         child: IconButton(
+//                           icon: Icon(Icons.info_outline, color: Colors.teal),
+//                           onPressed: _showInfoDialog,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 const SizedBox(height: 30),
+
+//                 // Grafik Box
+//                 Card(
+//                   shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(12)),
+//                   elevation: 2,
+//                   color: Colors.white,
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(16),
+//                     child: Column(
+//                       children: [
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                           children: [
+//                             Text(
+//                               "Grafik Sensor Nitrogen",
+//                               style: TextStyle(
+//                                   fontWeight: FontWeight.bold, fontSize: 16),
+//                             ),
+//                             IconButton(
+//                               icon: Icon(Icons.calendar_today,
+//                                   color: Colors.teal),
+//                               onPressed: () async {
+//                                 DateTime? picked = await showDatePicker(
+//                                   context: context,
+//                                   initialDate: DateTime.now(),
+//                                   firstDate: DateTime(2024),
+//                                   lastDate: DateTime.now(),
+//                                 );
+//                                 if (picked != null) {
+//                                   setState(() {
+//                                     _selectedDate = picked;
+//                                   });
+//                                 }
+//                               },
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 10),
+//                         SizedBox(
+//                           height: 300,
+//                           child: LineChart(
+//                             LineChartData(
+//                               minX: 0,
+//                               maxX: spots.length.toDouble(),
+//                               minY: 0,
+//                               maxY: 200,
+//                               backgroundColor: Colors.white,
+//                               lineTouchData: LineTouchData(
+//                                 touchTooltipData: LineTouchTooltipData(
+//                                   tooltipBgColor:
+//                                       Colors.blueGrey.withOpacity(0.7),
+//                                   getTooltipItems: (touchedSpots) =>
+//                                       touchedSpots.map((spot) {
+//                                     return LineTooltipItem(
+//                                       '${spot.y.toStringAsFixed(1)}',
+//                                       const TextStyle(color: Colors.white),
+//                                     );
+//                                   }).toList(),
+//                                 ),
+//                               ),
+//                               gridData: FlGridData(show: true),
+//                               titlesData: FlTitlesData(
+//                                 bottomTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                         '${value.toInt()}',
+//                                         style:
+//                                             TextStyle(fontSize: xAxisFontSize)),
+//                                   ),
+//                                 ),
+//                                 leftTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 20,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                         '${value.toInt()}',
+//                                         style:
+//                                             TextStyle(fontSize: yAxisFontSize)),
+//                                   ),
+//                                 ),
+//                                 topTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                                 rightTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                               ),
+//                               borderData: FlBorderData(show: false),
+//                               lineBarsData: [
+//                                 LineChartBarData(
+//                                   spots: spots,
+//                                   isCurved: true,
+//                                   barWidth: 4,
+//                                   gradient: const LinearGradient(
+//                                       colors: [Colors.teal, Colors.green]),
+//                                   dotData: FlDotData(show: true),
+//                                   belowBarData: BarAreaData(
+//                                     show: true,
+//                                     gradient: LinearGradient(
+//                                       colors: [
+//                                         Colors.teal.withOpacity(0.3),
+//                                         Colors.green.withOpacity(0.2),
+//                                       ],
+//                                     ),
+//                                   ),
+//                                 )
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   Future<QuerySnapshot> _getData() async {
+//     if (_selectedDate == null) {
+//       // Data terbaru
+//       return uplinksRef.orderBy('createdAt', descending: true).limit(24).get();
+//     } else {
+//       final start = DateTime(
+//         _selectedDate!.year,
+//         _selectedDate!.month,
+//         _selectedDate!.day,
+//       );
+//       final end = start.add(Duration(days: 1));
+
+//       return uplinksRef
+//           .where('createdAt',
+//               isGreaterThanOrEqualTo: Timestamp.fromDate(start),
+//               isLessThan: Timestamp.fromDate(end))
+//           .orderBy('createdAt', descending: false)
+//           .get();
+//     }
+//   }
+
+//   void _showInfoDialog() {
+//     showDialog(
+//       context: context,
+//       builder: (_) => AlertDialog(
+//         title: Text("Indikator Nitrogen"),
+//         content: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Table(
+//               border: TableBorder.all(color: Colors.grey.shade300),
+//               columnWidths: const {
+//                 0: FlexColumnWidth(2),
+//                 1: FlexColumnWidth(2),
+//               },
+//               children: [
+//                 _buildRow("Tidak Subur", "0 - 5"),
+//                 _buildRow("Kurang Subur", "5.5 - 6"),
+//                 _buildRow("Subur", "6 - 7.5"),
+//                 _buildRow("Kurang Subur", "7.6 - 8"),
+//                 _buildRow("Tidak Subur", "8 - 14"),
+//               ],
+//             )
+//           ],
+//         ),
+//         actions: [
+//           TextButton(
+//               onPressed: () => Navigator.pop(context), child: Text("Tutup"))
+//         ],
+//       ),
+//     );
+//   }
+
+//   TableRow _buildRow(String indikator, String rentang) {
+//     return TableRow(
+//       children: [
+//         _buildCell(indikator),
+//         _buildCell(rentang),
+//       ],
+//     );
+//   }
+
+//   Widget _buildCell(String text) {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: Text(text,
+//           textAlign: TextAlign.center, style: TextStyle(color: Colors.black87)),
+//     );
+//   }
+// }
+
+// class SensorNitrogenPage extends StatefulWidget {
+//   @override
+//   _SensorNitrogenPageState createState() => _SensorNitrogenPageState();
+// }
+
+// class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
+//   final CollectionReference uplinksRef =
+//       FirebaseFirestore.instance.collection('uplinks');
+
+//   double xAxisFontSize = 12;
+//   double yAxisFontSize = 12;
+//   DateTime? _selectedDate;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     DateTime startOfDay;
+//     DateTime endOfDay;
+
+//     if (_selectedDate != null) {
+//       startOfDay = DateTime(
+//           _selectedDate!.year, _selectedDate!.month, _selectedDate!.day);
+//       endOfDay = startOfDay.add(Duration(days: 1));
+//     } else {
+//       endOfDay = DateTime.now();
+//       startOfDay = endOfDay.subtract(Duration(hours: 24));
+//     }
+
+//     return Scaffold(
+//       backgroundColor: const Color(0xFFEAEAE3),
+//       appBar: AppBar(
+//         backgroundColor: Colors.white,
+//         title: const Text("Detail Sensor Nitrogen",
+//             style: TextStyle(color: Colors.black)),
+//         iconTheme: const IconThemeData(color: Colors.black),
+//         elevation: 0,
+//       ),
+//       body: FutureBuilder<QuerySnapshot>(
+//         future: uplinksRef
+//             .where('createdAt',
+//                 isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+//             .where('createdAt', isLessThan: Timestamp.fromDate(endOfDay))
+//             .orderBy('createdAt', descending: false)
+//             .get(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//           if (snapshot.hasError) {
+//             return Center(child: Text('Terjadi error: ${snapshot.error}'));
+//           }
+
+//           final docs = snapshot.data?.docs ?? [];
+//           final hasData = docs.isNotEmpty;
+
+//           final double latestNitrogen =
+//               hasData ? docs.last['nitrogen']?.toDouble() ?? 0.0 : 0.0;
+
+//           List<FlSpot> nitrogenPoints = [];
+
+//           for (int i = 0; i < docs.length; i++) {
+//             final time = (docs[i]['createdAt'] as Timestamp).toDate();
+//             final hour = time.hour.toDouble();
+//             final value = docs[i]['nitrogen']?.toDouble() ?? 0.0;
+//             nitrogenPoints.add(FlSpot(hour, value));
+//           }
+
+//           if (!hasData) {
+//             nitrogenPoints = [const FlSpot(0, 0)];
+//           }
+
+//           return SingleChildScrollView(
+//             padding: const EdgeInsets.all(16),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.center,
+//               children: [
+//                 Container(
+//                   width: double.infinity,
+//                   padding: const EdgeInsets.all(16),
+//                   decoration: BoxDecoration(
+//                     color: Colors.white,
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: Stack(
+//                     children: [
+//                       Align(
+//                         alignment: Alignment.center,
+//                         child: Column(
+//                           mainAxisSize: MainAxisSize.min,
+//                           children: [
+//                             const Text("Nitrogen",
+//                                 style: TextStyle(
+//                                     fontSize: 20, fontWeight: FontWeight.bold)),
+//                             Text("${latestNitrogen.toStringAsFixed(2)} ppm",
+//                                 style: const TextStyle(
+//                                     fontSize: 18, color: Colors.teal)),
+//                           ],
+//                         ),
+//                       ),
+//                       Positioned(
+//                         top: 0,
+//                         right: 0,
+//                         child: IconButton(
+//                           icon: const Icon(Icons.info_outline,
+//                               color: Colors.teal),
+//                           onPressed: () {
+//                             showDialog(
+//                               context: context,
+//                               builder: (_) => AlertDialog(
+//                                 title: const Text("Indikator Nitrogen"),
+//                                 content: Column(
+//                                   mainAxisSize: MainAxisSize.min,
+//                                   children: [
+//                                     Table(
+//                                       border: TableBorder.all(
+//                                           color: Colors.grey.shade300),
+//                                       columnWidths: const {
+//                                         0: FlexColumnWidth(2),
+//                                         1: FlexColumnWidth(2),
+//                                       },
+//                                       children: [
+//                                         _buildRow("Indikator", "Nitrogen",
+//                                             isHeader: true),
+//                                         _buildRow("Tidak Subur", "0 - 5"),
+//                                         _buildRow("Kurang Subur", "5,5 - 6"),
+//                                         _buildRow("Subur", "6 - 7,5"),
+//                                         _buildRow("Kurang Subur", "7,6 - 8"),
+//                                         _buildRow("Tidak Subur", "8 - 14"),
+//                                       ],
+//                                     ),
+//                                   ],
+//                                 ),
+//                                 actions: [
+//                                   TextButton(
+//                                     child: const Text("Tutup"),
+//                                     onPressed: () => Navigator.pop(context),
+//                                   )
+//                                 ],
+//                               ),
+//                             );
+//                           },
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 const SizedBox(height: 30),
+//                 Card(
+//                   shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(12)),
+//                   elevation: 2,
+//                   color: Colors.white,
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(16.0),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                           children: [
+//                             const Text("Grafik Sensor Nitrogen",
+//                                 style: TextStyle(
+//                                     fontWeight: FontWeight.bold, fontSize: 16)),
+//                             IconButton(
+//                               icon: const Icon(Icons.calendar_today,
+//                                   color: Colors.teal),
+//                               onPressed: () async {
+//                                 DateTime? picked = await showDatePicker(
+//                                   context: context,
+//                                   initialDate: _selectedDate ?? DateTime.now(),
+//                                   firstDate: DateTime(2024),
+//                                   lastDate: DateTime.now(),
+//                                 );
+//                                 if (picked != null) {
+//                                   setState(() {
+//                                     _selectedDate = picked;
+//                                   });
+//                                 }
+//                               },
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 10),
+//                         if (!hasData)
+//                           const Center(
+//                               child: Text("Tidak ada data pada tanggal ini.")),
+//                         SizedBox(
+//                           height: 300,
+//                           child: LineChart(
+//                             LineChartData(
+//                               minX: 0,
+//                               maxX: 23,
+//                               minY: 0,
+//                               maxY: 200,
+//                               backgroundColor: Colors.white,
+//                               lineTouchData: LineTouchData(
+//                                 touchTooltipData: LineTouchTooltipData(
+//                                   tooltipBgColor:
+//                                       Colors.blueGrey.withOpacity(0.7),
+//                                   getTooltipItems: (spots) => spots
+//                                       .map((spot) => LineTooltipItem(
+//                                             '${spot.y.toStringAsFixed(1)} ppm',
+//                                             const TextStyle(
+//                                                 color: Colors.white),
+//                                           ))
+//                                       .toList(),
+//                                 ),
+//                                 handleBuiltInTouches: true,
+//                                 enabled: true,
+//                               ),
+//                               gridData: FlGridData(show: false),
+//                               titlesData: FlTitlesData(
+//                                 bottomTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 4,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                       '${value.toInt()}',
+//                                       style: TextStyle(fontSize: xAxisFontSize),
+//                                     ),
+//                                   ),
+//                                 ),
+//                                 leftTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 20,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                       '${value.toInt()}',
+//                                       style: TextStyle(fontSize: yAxisFontSize),
+//                                     ),
+//                                   ),
+//                                 ),
+//                                 topTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                                 rightTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                               ),
+//                               borderData: FlBorderData(show: false),
+//                               lineBarsData: [
+//                                 LineChartBarData(
+//                                   spots: nitrogenPoints,
+//                                   isCurved: true,
+//                                   isStrokeCapRound: true,
+//                                   barWidth: 4,
+//                                   gradient: const LinearGradient(
+//                                       colors: [Colors.teal, Colors.green]),
+//                                   dotData: FlDotData(show: true),
+//                                   belowBarData: BarAreaData(
+//                                     show: true,
+//                                     gradient: LinearGradient(
+//                                       colors: [
+//                                         Colors.teal.withOpacity(0.3),
+//                                         Colors.green.withOpacity(0.2),
+//                                       ],
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ],
+//                               clipData: FlClipData.all(),
+//                               showingTooltipIndicators: [],
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   TableRow _buildRow(String indikator, String rentang,
+//       {bool isHeader = false}) {
+//     return TableRow(
+//       children: [
+//         _buildCell(indikator, isHeader: isHeader),
+//         _buildCell(rentang, isHeader: isHeader),
+//       ],
+//     );
+//   }
+
+//   Widget _buildCell(String text, {bool isHeader = false}) {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: Text(
+//         text,
+//         style: TextStyle(
+//           fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+//           color: isHeader ? Colors.black : Colors.grey[800],
+//         ),
+//         textAlign: TextAlign.center,
+//       ),
+//     );
+//   }
+// }
+
+// class SensorNitrogenPage extends StatefulWidget {
+//   @override
+//   _SensorNitrogenPageState createState() => _SensorNitrogenPageState();
+// }
+
+// class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
+//   DateTime? _selectedDate;
+//   List<ChartData> _dataPoints = [];
+//   bool _isLoading = true;
+//   late ZoomPanBehavior _zoomPanBehavior;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _zoomPanBehavior = ZoomPanBehavior(
+//       enablePinching: true,
+//       enablePanning: true,
+//       zoomMode: ZoomMode.x,
+//     );
+//     _fetchLatestData();
+//   }
+
+//   Future<void> _fetchLatestData() async {
+//     setState(() => _isLoading = true);
+//     QuerySnapshot snapshot = await FirebaseFirestore.instance
+//         .collection('uplinks')
+//         .orderBy('createdAt', descending: true)
+//         .limit(24)
+//         .get();
+
+//     final data = snapshot.docs
+//         .map((doc) => ChartData.fromFirestore(doc))
+//         .toList()
+//         .reversed
+//         .toList();
+
+//     setState(() {
+//       _dataPoints = data;
+//       _isLoading = false;
+//     });
+//   }
+
+//   Future<void> _pickDate() async {
+//     final DateTime? picked = await showDatePicker(
+//       context: context,
+//       initialDate: _selectedDate ?? DateTime.now(),
+//       firstDate: DateTime(2024, 1),
+//       lastDate: DateTime.now(),
+//     );
+//     if (picked != null) {
+//       setState(() {
+//         _selectedDate = picked;
+//       });
+//       _fetchDataByDate(picked);
+//     }
+//   }
+
+//   Future<void> _fetchDataByDate(DateTime date) async {
+//     setState(() => _isLoading = true);
+//     final start = Timestamp.fromDate(DateTime(date.year, date.month, date.day));
+//     final end =
+//         Timestamp.fromDate(DateTime(date.year, date.month, date.day + 1));
+
+//     final snapshot = await FirebaseFirestore.instance
+//         .collection('uplinks')
+//         .where('createdAt', isGreaterThanOrEqualTo: start)
+//         .where('createdAt', isLessThan: end)
+//         .orderBy('createdAt')
+//         .get();
+
+//     final data =
+//         snapshot.docs.map((doc) => ChartData.fromFirestore(doc)).toList();
+
+//     setState(() {
+//       _dataPoints =
+//           data.isEmpty ? [ChartData(x: 0, y: 0, label: 'No data')] : data;
+//       _isLoading = false;
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: const Color(0xFFEAEAE3),
+//       appBar: AppBar(
+//         backgroundColor: Colors.white,
+//         title: const Text("Detail Sensor Nitrogen",
+//             style: TextStyle(color: Colors.black)),
+//         iconTheme: const IconThemeData(color: Colors.black),
+//         elevation: 0,
+//         actions: [
+//           IconButton(
+//             icon: Icon(Icons.calendar_today, color: Colors.teal),
+//             onPressed: _pickDate,
+//           )
+//         ],
+//       ),
+//       body: _isLoading
+//           ? Center(child: CircularProgressIndicator())
+//           : Padding(
+//               padding: const EdgeInsets.all(16.0),
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     _selectedDate != null
+//                         ? "Grafik Sensor Nitrogen - ${DateFormat('dd MMM yyyy').format(_selectedDate!)}"
+//                         : "Grafik Sensor Nitrogen (Terbaru)",
+//                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+//                   ),
+//                   const SizedBox(height: 10),
+//                   Expanded(
+//                     child: SfCartesianChart(
+//                       zoomPanBehavior: _zoomPanBehavior,
+//                       primaryXAxis:
+//                           NumericAxis(title: AxisTitle(text: 'Index')),
+//                       primaryYAxis:
+//                           NumericAxis(title: AxisTitle(text: 'Nitrogen (ppm)')),
+//                       series: <LineSeries<ChartData, double>>[
+//                         LineSeries<ChartData, double>(
+//                           dataSource: _dataPoints,
+//                           xValueMapper: (ChartData data, _) => data.x,
+//                           yValueMapper: (ChartData data, _) => data.y,
+//                           dataLabelSettings:
+//                               DataLabelSettings(isVisible: false),
+//                           markerSettings: MarkerSettings(isVisible: true),
+//                           name: 'Nitrogen',
+//                         )
+//                       ],
+//                     ),
+//                   )
+//                 ],
+//               ),
+//             ),
+//     );
+//   }
+// }
+
+// class ChartData {
+//   final double x;
+//   final double y;
+//   final String label;
+
+//   ChartData({required this.x, required this.y, required this.label});
+
+//   factory ChartData.fromFirestore(DocumentSnapshot doc) {
+//     final data = doc.data() as Map<String, dynamic>;
+//     final createdAt = (data['createdAt'] as Timestamp).toDate();
+//     return ChartData(
+//       x: createdAt.hour + (createdAt.minute / 60.0),
+//       y: (data['nitrogen'] as num?)?.toDouble() ?? 0.0,
+//       label: DateFormat.Hm().format(createdAt),
+//     );
+//   }
+// }
+//
+//
+//
+//
+//
+//socket io
 class SensorNitrogenPage extends StatefulWidget {
   @override
   _SensorNitrogenPageState createState() => _SensorNitrogenPageState();
@@ -170,14 +1830,70 @@ class SensorNitrogenPage extends StatefulWidget {
 
 class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
   final CollectionReference uplinksRef =
-      FirebaseFirestore.instance.collection('uplinks');
+      FirebaseFirestore.instance.collection('uplink-p2p');
 
-  int _selectedHours = 24;
+  IO.Socket? socket;
+  double latestNitrogen = 0.0;
+  DateTime? _selectedDate;
   double xAxisFontSize = 12;
   double yAxisFontSize = 12;
+  // List<FlSpot> _realtimeData = [];
+
+  @override
+  void initState() {
+    super.initState();
+    connectToSocket();
+  }
+
+  void connectToSocket() {
+    print("Trying to connect to socket.io...");
+    socket = IO.io("https://webhook.ktyudha.site", <String, dynamic>{
+      'transports': ['websocket'],
+      'secure': true,
+    });
+
+    socket!.onConnect((_) {
+      print("\u2705 Connected to socket.io");
+    });
+
+    socket!.onDisconnect((_) => print("Socket disconnected"));
+    socket!.onConnectError((err) => print("Socket connect error: $err"));
+    socket!.onError((err) => print("Socket error: $err"));
+
+    socket!.on('send-uplink-p2p', (data) {
+      final nitrogenValue = double.tryParse(data['uplink']['nitrogen']) ?? 0.0;
+      setState(() {
+        latestNitrogen = nitrogenValue;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    socket?.disconnect();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    DateTime startOfDay;
+    DateTime endOfDay;
+
+    if (_selectedDate != null) {
+      startOfDay = DateTime(
+          _selectedDate!.year, _selectedDate!.month, _selectedDate!.day);
+      endOfDay = startOfDay.add(Duration(days: 1));
+    } else {
+      endOfDay = DateTime.now();
+      startOfDay = endOfDay.subtract(Duration(hours: 24));
+    }
+    final startEpoch = startOfDay.millisecondsSinceEpoch;
+    final endEpoch = endOfDay.millisecondsSinceEpoch;
+
+    print('Selected date: $_selectedDate');
+    print('Start epoch: $startEpoch');
+    print('End epoch: $endEpoch');
+
     return Scaffold(
       backgroundColor: const Color(0xFFEAEAE3),
       appBar: AppBar(
@@ -188,10 +1904,19 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
         elevation: 0,
       ),
       body: FutureBuilder<QuerySnapshot>(
+        // future: uplinksRef
+        //     .where('metadata.timestamp',
+        //         isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        //     .where('metadata.timestamp',
+        //         isLessThan: Timestamp.fromDate(endOfDay))
+        //     .orderBy('metadata.timestamp', descending: true)
+        //     .get(),
         future: uplinksRef
-            .orderBy('createdAt', descending: true)
-            .limit(_selectedHours)
+            .orderBy('metadata.timestamp', descending: true)
+            .where('metadata.timestamp', isGreaterThanOrEqualTo: startEpoch)
+            .where('metadata.timestamp', isLessThan: endEpoch)
             .get(),
+
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -201,16 +1926,23 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
           }
 
           final docs = snapshot.data?.docs ?? [];
-          if (docs.isEmpty) {
-            return const Center(child: Text('Data tidak ditemukan'));
+          final hasData = docs.isNotEmpty;
+
+          List<FlSpot> nitrogenPoints = [];
+
+          for (int i = 0; i < docs.length; i++) {
+            // final time =
+            //     (docs[i]['metadata']['timestamp'] as Timestamp).toDate();
+            final timestampMillis = docs[i]['metadata']['timestamp'] as int;
+            final time = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
+
+            final hour = time.hour.toDouble();
+            final value = (docs[i]['uplink']['nitrogen']);
+            nitrogenPoints.add(FlSpot(hour, value));
           }
 
-          final double latestTemp = docs.first['nitrogen']?.toDouble() ?? 0.0;
-
-          List<FlSpot> suhuPoints = [];
-          for (int i = 0; i < docs.length; i++) {
-            final temp = docs[i]['nitrogen']?.toDouble() ?? 0.0;
-            suhuPoints.add(FlSpot(i.toDouble(), temp));
+          if (!hasData) {
+            nitrogenPoints = [const FlSpot(0, 0)];
           }
 
           return SingleChildScrollView(
@@ -218,7 +1950,6 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Temperature box with info icon and centered text
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -233,11 +1964,11 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text("Nitrogen",
+                            const Text("Nitrogen",
                                 style: TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold)),
-                            Text("${latestTemp.toStringAsFixed(2)} ppm",
-                                style: TextStyle(
+                            Text("${latestNitrogen.toStringAsFixed(2)} ppm",
+                                style: const TextStyle(
                                     fontSize: 18, color: Colors.teal)),
                           ],
                         ),
@@ -246,68 +1977,26 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                         top: 0,
                         right: 0,
                         child: IconButton(
-                          icon: Icon(Icons.info_outline, color: Colors.teal),
+                          icon: const Icon(Icons.info_outline,
+                              color: Colors.teal),
                           onPressed: () {
                             showDialog(
                               context: context,
                               builder: (_) => AlertDialog(
-                                title: Text("Indikator Nitrogen"),
+                                title: const Text("Indikator Nitrogen"),
                                 content: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[300],
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(50),
-                                          topRight: Radius.circular(50),
-                                        ),
-                                      ),
-                                      child: Table(
-                                        columnWidths: const {
-                                          0: FlexColumnWidth(2),
-                                          1: FlexColumnWidth(2),
-                                        },
-                                        children: [
-                                          TableRow(
-                                            decoration: BoxDecoration(
-                                                color: Colors.grey[300]),
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Text('Indikator',
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.black)),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Text('Nitrogen',
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.black)),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                     Table(
-                                      border: TableBorder.symmetric(
-                                        inside: BorderSide(
-                                            color: Colors.grey.shade300),
-                                        outside: BorderSide(
-                                            color: Colors.grey.shade400),
-                                      ),
+                                      border: TableBorder.all(
+                                          color: Colors.grey.shade300),
                                       columnWidths: const {
                                         0: FlexColumnWidth(2),
                                         1: FlexColumnWidth(2),
                                       },
                                       children: [
+                                        _buildRow("Indikator", "Nitrogen",
+                                            isHeader: true),
                                         _buildRow("Tidak Subur", "0 - 5"),
                                         _buildRow("Kurang Subur", "5,5 - 6"),
                                         _buildRow("Subur", "6 - 7,5"),
@@ -319,7 +2008,7 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                                 ),
                                 actions: [
                                   TextButton(
-                                    child: Text("Tutup"),
+                                    child: const Text("Tutup"),
                                     onPressed: () => Navigator.pop(context),
                                   )
                                 ],
@@ -332,8 +2021,6 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                // Grafik Sensor Suhu Title and Dropdown inside box
-                // Grafik Box
                 Card(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -350,33 +2037,35 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                             const Text("Grafik Sensor Nitrogen",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
-                            DropdownButton<int>(
-                              value: _selectedHours,
-                              onChanged: (int? newValue) {
-                                if (newValue != null) {
+                            IconButton(
+                              icon: const Icon(Icons.calendar_today,
+                                  color: Colors.teal),
+                              onPressed: () async {
+                                DateTime? picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: _selectedDate ?? DateTime.now(),
+                                  firstDate: DateTime(2024),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (picked != null) {
                                   setState(() {
-                                    _selectedHours = newValue;
+                                    _selectedDate = picked;
                                   });
                                 }
                               },
-                              items: const [
-                                DropdownMenuItem(
-                                    value: 12, child: Text("12 Jam")),
-                                DropdownMenuItem(
-                                    value: 24, child: Text("24 Jam")),
-                                DropdownMenuItem(
-                                    value: 48, child: Text("2 Hari")),
-                              ],
                             ),
                           ],
                         ),
                         const SizedBox(height: 10),
+                        if (!hasData)
+                          const Center(
+                              child: Text("Tidak ada data pada tanggal ini.")),
                         SizedBox(
                           height: 300,
                           child: LineChart(
                             LineChartData(
                               minX: 0,
-                              maxX: _selectedHours.toDouble() - 1,
+                              maxX: 23,
                               minY: 0,
                               maxY: 200,
                               backgroundColor: Colors.white,
@@ -384,31 +2073,18 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                                 touchTooltipData: LineTouchTooltipData(
                                   tooltipBgColor:
                                       Colors.blueGrey.withOpacity(0.7),
-                                  getTooltipItems: (touchedSpots) {
-                                    return touchedSpots.map((spot) {
-                                      return LineTooltipItem(
-                                        '${spot.y.toStringAsFixed(1)}',
-                                        const TextStyle(color: Colors.white),
-                                      );
-                                    }).toList();
-                                  },
+                                  getTooltipItems: (spots) => spots
+                                      .map((spot) => LineTooltipItem(
+                                            '${spot.y.toStringAsFixed(1)} ppm',
+                                            const TextStyle(
+                                                color: Colors.white),
+                                          ))
+                                      .toList(),
                                 ),
                                 handleBuiltInTouches: true,
                                 enabled: true,
                               ),
-                              gridData: FlGridData(
-                                show: false,
-                                drawVerticalLine: true,
-                                drawHorizontalLine: true,
-                                getDrawingHorizontalLine: (value) => FlLine(
-                                  color: Colors.grey.shade300,
-                                  strokeWidth: 1,
-                                ),
-                                getDrawingVerticalLine: (value) => FlLine(
-                                  color: Colors.grey.shade300,
-                                  strokeWidth: 1,
-                                ),
-                              ),
+                              gridData: FlGridData(show: false),
                               titlesData: FlTitlesData(
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
@@ -438,13 +2114,12 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                               borderData: FlBorderData(show: false),
                               lineBarsData: [
                                 LineChartBarData(
-                                  spots: suhuPoints,
+                                  spots: nitrogenPoints,
                                   isCurved: true,
                                   isStrokeCapRound: true,
                                   barWidth: 4,
                                   gradient: const LinearGradient(
-                                    colors: [Colors.teal, Colors.green],
-                                  ),
+                                      colors: [Colors.teal, Colors.green]),
                                   dotData: FlDotData(show: true),
                                   belowBarData: BarAreaData(
                                     show: true,
@@ -476,10 +2151,12 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
 
   TableRow _buildRow(String indikator, String rentang,
       {bool isHeader = false}) {
-    return TableRow(children: [
-      _buildCell(indikator, isHeader: isHeader),
-      _buildCell(rentang, isHeader: isHeader),
-    ]);
+    return TableRow(
+      children: [
+        _buildCell(indikator, isHeader: isHeader),
+        _buildCell(rentang, isHeader: isHeader),
+      ],
+    );
   }
 
   Widget _buildCell(String text, {bool isHeader = false}) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// import 'package:smart_agriculture_jadi/main.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_kalium.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_kelembaban.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_nitrogen.dart';
@@ -9,6 +10,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
+// // import 'package:overlay_support/overlay_support.dart'; // Untuk notifikasi lokal
 
 void main() {
   runApp(MyApp());
@@ -212,6 +215,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     connectToSocket();
+    // setupFCM();/
   }
 
   // void connectToSocket() {
@@ -391,7 +395,7 @@ class _HomePageState extends State<HomePage> {
       sensorData[5]['value'] = '0 ppm';
 
       for (var item in sensorData) {
-        item['status'] = 'Normal';
+        item['status'] = '-';
         item['statusColor'] = Colors.grey;
       }
     });
@@ -768,21 +772,21 @@ class SensorCard extends StatelessWidget {
 String getStatus(String type, double value) {
   switch (type) {
     case "Temperature":
-      if (value < 17) return "Tidak Subur";
-      if (value < 22) return "Kurang Subur";
-      if (value <= 31) return "Subur";
+      if (value < 18) return "Tidak Subur";
+      if (value < 24) return "Kurang Subur";
+      if (value <= 29) return "Subur";
       if (value <= 35) return "Kurang Subur";
       return "Tidak Subur";
     case "Soil Moisture":
-      if (value < 50) return "Tidak Subur";
-      if (value <= 70) return "Kurang Subur";
+      if (value < 30) return "Tidak Subur";
+      if (value <= 33) return "Kurang Subur";
       if (value <= 90) return "Subur";
       return "Kurang Subur";
     case "pH":
-      if (value < 5.5) return "Tidak Subur";
-      if (value < 6) return "Kurang Subur";
-      if (value <= 7.5) return "Subur";
-      if (value <= 8) return "Kurang Subur";
+      if (value < 5.0) return "Tidak Subur";
+      if (value < 5.5) return "Kurang Subur";
+      if (value <= 8.2) return "Subur";
+      if (value <= 8.5) return "Kurang Subur";
       return "Tidak Subur";
     case "Nitrogen":
       if (value < 5.5) return "Tidak Subur";

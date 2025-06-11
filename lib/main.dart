@@ -3,7 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:smart_agriculture_jadi/pages/main_page.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:smart_agriculture_jadi/pages/login_page.dart'; // tambahkan ini
+import 'package:smart_agriculture_jadi/pages/login_page.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 // void main() {
 //   runApp(MyApp());
@@ -57,3 +59,44 @@ class AuthGate extends StatelessWidget {
     );
   }
 }
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("📬 Pesan diterima di background: ${message.messageId}");
+}
+
+// void setupFCM() async {
+//   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+//   // Permintaan izin
+//   await FirebaseMessaging.instance.requestPermission();
+
+//   // Dapatkan Token
+//   final token = await FirebaseMessaging.instance.getToken();
+//   print("🔥 FCM Token: $token");
+
+//   // Listener ketika app aktif
+//   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+//     RemoteNotification? notification = message.notification;
+//     AndroidNotification? android = message.notification?.android;
+
+//     if (notification != null && android != null) {
+//       flutterLocalNotificationsPlugin.show(
+//         notification.hashCode,
+//         notification.title,
+//         notification.body,
+//         NotificationDetails(
+//           android: AndroidNotificationDetails(
+//             'channel_id',
+//             'Channel Name',
+//             importance: Importance.max,
+//             priority: Priority.high,
+//           ),
+//         ),
+//       );
+//     }
+//   });
+// }
