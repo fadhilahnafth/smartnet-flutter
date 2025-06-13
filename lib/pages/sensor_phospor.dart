@@ -669,11 +669,11 @@ class _SensorPhosporPageState extends State<SensorPhosporPage> {
                                       children: [
                                         _buildRow("Indikator", "Kelembaban",
                                             isHeader: true),
-                                        _buildRow("Tidak Subur", "0 - 5"),
-                                        _buildRow("Kurang Subur", "5,5 - 6"),
-                                        _buildRow("Subur", "6 - 7,5"),
-                                        _buildRow("Kurang Subur", "7,6 - 8"),
-                                        _buildRow("Tidak Subur", "8 - 14"),
+                                        _buildRow("Tidak Subur", "0 - 3"),
+                                        _buildRow("Kurang Subur", "3 - 6.1"),
+                                        _buildRow("Subur", "6.1 - 12.2"),
+                                        _buildRow("Kurang Subur", ">12.2"),
+                                        // _buildRow("Tidak Subur", "8 - 14"),
                                       ],
                                     ),
                                   ],
@@ -710,7 +710,7 @@ class _SensorPhosporPageState extends State<SensorPhosporPage> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             IconButton(
-                              icon: const Icon(Icons.calendar_today,
+                              icon: const Icon(Icons.calendar_month,
                                   color: Colors.teal),
                               onPressed: () async {
                                 DateTime? picked = await showDatePicker(

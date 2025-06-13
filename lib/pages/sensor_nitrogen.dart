@@ -1662,166 +1662,6 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 //   }
 // }
 
-// class SensorNitrogenPage extends StatefulWidget {
-//   @override
-//   _SensorNitrogenPageState createState() => _SensorNitrogenPageState();
-// }
-
-// class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
-//   DateTime? _selectedDate;
-//   List<ChartData> _dataPoints = [];
-//   bool _isLoading = true;
-//   late ZoomPanBehavior _zoomPanBehavior;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _zoomPanBehavior = ZoomPanBehavior(
-//       enablePinching: true,
-//       enablePanning: true,
-//       zoomMode: ZoomMode.x,
-//     );
-//     _fetchLatestData();
-//   }
-
-//   Future<void> _fetchLatestData() async {
-//     setState(() => _isLoading = true);
-//     QuerySnapshot snapshot = await FirebaseFirestore.instance
-//         .collection('uplinks')
-//         .orderBy('createdAt', descending: true)
-//         .limit(24)
-//         .get();
-
-//     final data = snapshot.docs
-//         .map((doc) => ChartData.fromFirestore(doc))
-//         .toList()
-//         .reversed
-//         .toList();
-
-//     setState(() {
-//       _dataPoints = data;
-//       _isLoading = false;
-//     });
-//   }
-
-//   Future<void> _pickDate() async {
-//     final DateTime? picked = await showDatePicker(
-//       context: context,
-//       initialDate: _selectedDate ?? DateTime.now(),
-//       firstDate: DateTime(2024, 1),
-//       lastDate: DateTime.now(),
-//     );
-//     if (picked != null) {
-//       setState(() {
-//         _selectedDate = picked;
-//       });
-//       _fetchDataByDate(picked);
-//     }
-//   }
-
-//   Future<void> _fetchDataByDate(DateTime date) async {
-//     setState(() => _isLoading = true);
-//     final start = Timestamp.fromDate(DateTime(date.year, date.month, date.day));
-//     final end =
-//         Timestamp.fromDate(DateTime(date.year, date.month, date.day + 1));
-
-//     final snapshot = await FirebaseFirestore.instance
-//         .collection('uplinks')
-//         .where('createdAt', isGreaterThanOrEqualTo: start)
-//         .where('createdAt', isLessThan: end)
-//         .orderBy('createdAt')
-//         .get();
-
-//     final data =
-//         snapshot.docs.map((doc) => ChartData.fromFirestore(doc)).toList();
-
-//     setState(() {
-//       _dataPoints =
-//           data.isEmpty ? [ChartData(x: 0, y: 0, label: 'No data')] : data;
-//       _isLoading = false;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: const Color(0xFFEAEAE3),
-//       appBar: AppBar(
-//         backgroundColor: Colors.white,
-//         title: const Text("Detail Sensor Nitrogen",
-//             style: TextStyle(color: Colors.black)),
-//         iconTheme: const IconThemeData(color: Colors.black),
-//         elevation: 0,
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.calendar_today, color: Colors.teal),
-//             onPressed: _pickDate,
-//           )
-//         ],
-//       ),
-//       body: _isLoading
-//           ? Center(child: CircularProgressIndicator())
-//           : Padding(
-//               padding: const EdgeInsets.all(16.0),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(
-//                     _selectedDate != null
-//                         ? "Grafik Sensor Nitrogen - ${DateFormat('dd MMM yyyy').format(_selectedDate!)}"
-//                         : "Grafik Sensor Nitrogen (Terbaru)",
-//                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-//                   ),
-//                   const SizedBox(height: 10),
-//                   Expanded(
-//                     child: SfCartesianChart(
-//                       zoomPanBehavior: _zoomPanBehavior,
-//                       primaryXAxis:
-//                           NumericAxis(title: AxisTitle(text: 'Index')),
-//                       primaryYAxis:
-//                           NumericAxis(title: AxisTitle(text: 'Nitrogen (ppm)')),
-//                       series: <LineSeries<ChartData, double>>[
-//                         LineSeries<ChartData, double>(
-//                           dataSource: _dataPoints,
-//                           xValueMapper: (ChartData data, _) => data.x,
-//                           yValueMapper: (ChartData data, _) => data.y,
-//                           dataLabelSettings:
-//                               DataLabelSettings(isVisible: false),
-//                           markerSettings: MarkerSettings(isVisible: true),
-//                           name: 'Nitrogen',
-//                         )
-//                       ],
-//                     ),
-//                   )
-//                 ],
-//               ),
-//             ),
-//     );
-//   }
-// }
-
-// class ChartData {
-//   final double x;
-//   final double y;
-//   final String label;
-
-//   ChartData({required this.x, required this.y, required this.label});
-
-//   factory ChartData.fromFirestore(DocumentSnapshot doc) {
-//     final data = doc.data() as Map<String, dynamic>;
-//     final createdAt = (data['createdAt'] as Timestamp).toDate();
-//     return ChartData(
-//       x: createdAt.hour + (createdAt.minute / 60.0),
-//       y: (data['nitrogen'] as num?)?.toDouble() ?? 0.0,
-//       label: DateFormat.Hm().format(createdAt),
-//     );
-//   }
-// }
-//
-//
-//
-//
-//
 //socket io
 class SensorNitrogenPage extends StatefulWidget {
   @override
@@ -1904,19 +1744,11 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
         elevation: 0,
       ),
       body: FutureBuilder<QuerySnapshot>(
-        // future: uplinksRef
-        //     .where('metadata.timestamp',
-        //         isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-        //     .where('metadata.timestamp',
-        //         isLessThan: Timestamp.fromDate(endOfDay))
-        //     .orderBy('metadata.timestamp', descending: true)
-        //     .get(),
         future: uplinksRef
             .orderBy('timestamp', descending: true)
             .where('timestamp', isGreaterThanOrEqualTo: startEpoch)
             .where('timestamp', isLessThan: endEpoch)
             .get(),
-
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -1931,17 +1763,6 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
           List<FlSpot> nitrogenPoints = [];
 
           for (int i = 0; i < docs.length; i++) {
-            //   // final time =
-            //   //     (docs[i]['metadata']['timestamp'] as Timestamp).toDate();
-            //   // final timestampMillis = docs[i]['metadata']['timestamp'] as int;
-            //   // final time = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
-            //   final timestamp = docs[i]['timestamp'] ?? 0;
-            //   final time = DateTime.fromMillisecondsSinceEpoch(timestamp);
-
-            //   final hour = time.hour.toDouble();
-            //   final value = (docs[i]['uplink']['nitrogen']);
-            //   nitrogenPoints.add(FlSpot(hour, value));
-            // }
             final data = docs[i].data() as Map<String, dynamic>;
             final timestamp = data['timestamp'] ?? 0;
             final time = DateTime.fromMillisecondsSinceEpoch(timestamp);
@@ -2010,11 +1831,11 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                                       children: [
                                         _buildRow("Indikator", "Nitrogen",
                                             isHeader: true),
-                                        _buildRow("Tidak Subur", "0 - 5"),
-                                        _buildRow("Kurang Subur", "5,5 - 6"),
-                                        _buildRow("Subur", "6 - 7,5"),
-                                        _buildRow("Kurang Subur", "7,6 - 8"),
-                                        _buildRow("Tidak Subur", "8 - 14"),
+                                        _buildRow("Tidak Subur", "0 - 75"),
+                                        _buildRow("Kurang Subur", "75 - 155"),
+                                        _buildRow("Subur", "155 - 250"),
+                                        _buildRow("Kurang Subur", ">250"),
+                                        // _buildRow("Tidak Subur", "8 - 14"),
                                       ],
                                     ),
                                   ],

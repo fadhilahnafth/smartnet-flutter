@@ -669,11 +669,12 @@ class _SensorKaliumPageState extends State<SensorKaliumPage> {
                                       children: [
                                         _buildRow("Indikator", "Kelembaban",
                                             isHeader: true),
-                                        _buildRow("Tidak Subur", "0 - 5"),
-                                        _buildRow("Kurang Subur", "5,5 - 6"),
-                                        _buildRow("Subur", "6 - 7,5"),
-                                        _buildRow("Kurang Subur", "7,6 - 8"),
-                                        _buildRow("Tidak Subur", "8 - 14"),
+                                        _buildRow("Tidak Subur", "0 - 30.5"),
+                                        _buildRow(
+                                            "Kurang Subur", "30.6 - 65.5"),
+                                        _buildRow("Subur", "65.6 - 155.5"),
+                                        _buildRow("Kurang Subur", ">155"),
+                                        // _buildRow("Tidak Subur", "8 - 14"),
                                       ],
                                     ),
                                   ],
@@ -710,7 +711,7 @@ class _SensorKaliumPageState extends State<SensorKaliumPage> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             IconButton(
-                              icon: const Icon(Icons.calendar_today,
+                              icon: const Icon(Icons.calendar_month,
                                   color: Colors.teal),
                               onPressed: () async {
                                 DateTime? picked = await showDatePicker(

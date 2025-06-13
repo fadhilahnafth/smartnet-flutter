@@ -789,22 +789,22 @@ String getStatus(String type, double value) {
       if (value <= 8.5) return "Kurang Subur";
       return "Tidak Subur";
     case "Nitrogen":
-      if (value < 5.5) return "Tidak Subur";
-      if (value < 6) return "Kurang Subur";
-      if (value <= 7.5) return "Subur";
-      if (value <= 8) return "Kurang Subur";
+      if (value < 75) return "Tidak Subur";
+      if (value < 155) return "Kurang Subur";
+      if (value <= 249) return "Subur";
+      if (value <= 250) return "Kurang Subur";
       return "Tidak Subur";
     case "Phospor":
-      if (value < 5.5) return "Tidak Subur";
+      if (value < 3) return "Tidak Subur";
       if (value < 6) return "Kurang Subur";
-      if (value <= 7.5) return "Subur";
-      if (value <= 8) return "Kurang Subur";
+      if (value <= 12) return "Subur";
+      if (value <= 12.1) return "Kurang Subur";
       return "Tidak Subur";
     case "Kalium":
-      if (value < 5.5) return "Tidak Subur";
-      if (value < 6) return "Kurang Subur";
-      if (value <= 7.5) return "Subur";
-      if (value <= 8) return "Kurang Subur";
+      if (value < 30.5) return "Tidak Subur";
+      if (value < 65.5) return "Kurang Subur";
+      if (value <= 155.5) return "Subur";
+      if (value <= 156) return "Kurang Subur";
       return "Tidak Subur";
     default:
       return "-";
@@ -828,7 +828,6 @@ Color getStatusColor(String status) {
 List<Map<String, dynamic>> sensorData = [
   {
     "icon": Icons.thermostat,
-    "iconColor": Colors.orange,
     "iconSize": 45.0,
     "iconOffsetX": 5.0,
     "iconOffsetY": 40.0,
@@ -853,7 +852,6 @@ List<Map<String, dynamic>> sensorData = [
   },
   {
     "icon": Icons.opacity,
-    "iconColor": Colors.blue,
     "iconSize": 45.0,
     "iconOffsetX": 5.0,
     "iconOffsetY": 40.0,
@@ -861,7 +859,7 @@ List<Map<String, dynamic>> sensorData = [
     "valueOffsetY": 50.0,
     "valueFontSize": 20.0,
     "title": "pH",
-    "titleFontSize": 12.0,
+    "titleFontSize": 13.0,
     "titleOffsetX": 15.0,
     "titleOffsetY": 10.0,
     "status": "-",
@@ -872,11 +870,9 @@ List<Map<String, dynamic>> sensorData = [
     "detailFontSize": 13.0,
     "detailOffsetX": 105.0,
     "detailOffsetY": 120.0,
-    "underline": false,
   },
   {
     "icon": Icons.air,
-    "iconColor": Colors.purple,
     "iconSize": 45.0,
     "iconOffsetX": 15.0,
     "iconOffsetY": 40.0,
@@ -884,7 +880,7 @@ List<Map<String, dynamic>> sensorData = [
     "valueOffsetY": 50.0,
     "valueFontSize": 20.0,
     "title": "Nitrogen",
-    "titleFontSize": 15.0,
+    "titleFontSize": 13.0,
     "titleOffsetX": 15.0,
     "titleOffsetY": 10.0,
     "titleColor": Colors.purple,
@@ -896,18 +892,16 @@ List<Map<String, dynamic>> sensorData = [
     "detailFontSize": 13.0,
     "detailOffsetX": 105.0,
     "detailOffsetY": 120.0,
-    "underline": false,
   },
   {
     "icon": Icons.grass,
-    "iconColor": Colors.brown,
     "iconSize": 45.0,
     "iconOffsetX": 15.0,
     "iconOffsetY": 40.0,
     "valueOffsetX": 80.0,
     "valueOffsetY": 50.0,
     "title": "Soil Moisture",
-    "titleFontSize": 12.0,
+    "titleFontSize": 13.0,
     "titleOffsetX": 15.0,
     "titleOffsetY": 10.0,
     "titleColor": Colors.brown,
@@ -919,11 +913,9 @@ List<Map<String, dynamic>> sensorData = [
     "detailFontSize": 13.0,
     "detailOffsetX": 105.0,
     "detailOffsetY": 120.0,
-    "underline": false,
   },
   {
     "icon": Icons.eco,
-    "iconColor": Colors.green,
     "iconSize": 45.0,
     "iconOffsetX": 10.0,
     "iconOffsetY": 40.0,
@@ -931,7 +923,7 @@ List<Map<String, dynamic>> sensorData = [
     "valueOffsetY": 50.0,
     "valueFontSize": 20.0,
     "title": "Kalium",
-    "titleFontSize": 12.0,
+    "titleFontSize": 13.0,
     "titleOffsetX": 15.0,
     "titleOffsetY": 10.0,
     "titleColor": Colors.green,
@@ -943,11 +935,9 @@ List<Map<String, dynamic>> sensorData = [
     "detailFontSize": 13.0,
     "detailOffsetX": 105.0,
     "detailOffsetY": 120.0,
-    "underline": false,
   },
   {
     "icon": Icons.science_outlined,
-    "iconColor": Colors.purple,
     "iconSize": 45.0,
     "iconOffsetX": 10.0,
     "iconOffsetY": 40.0,
@@ -957,7 +947,7 @@ List<Map<String, dynamic>> sensorData = [
     "title": "Phospor",
     "titleOffsetX": 15.0,
     "titleOffsetY": 10.0,
-    "titleFontSize": 15.0,
+    "titleFontSize": 13.0,
     "titleColor": Colors.purple,
     "status": "-",
     "statusFontSize": 15.0,
@@ -967,6 +957,5 @@ List<Map<String, dynamic>> sensorData = [
     "detailFontSize": 13.0,
     "detailOffsetX": 105.0,
     "detailOffsetY": 120.0,
-    "underline": false,
   },
 ];

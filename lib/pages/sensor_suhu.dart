@@ -507,11 +507,11 @@ class _SensorSuhuPageState extends State<SensorSuhuPage> {
                                       children: [
                                         _buildRow("Indikator", "SUhu",
                                             isHeader: true),
-                                        _buildRow("Tidak Subur", "0 - 5"),
-                                        _buildRow("Kurang Subur", "5,5 - 6"),
-                                        _buildRow("Subur", "6 - 7,5"),
-                                        _buildRow("Kurang Subur", "7,6 - 8"),
-                                        _buildRow("Tidak Subur", "8 - 14"),
+                                        _buildRow("Tidak Subur", "<17"),
+                                        _buildRow("Kurang Subur", "17 - 22"),
+                                        _buildRow("Subur", "22 - 29"),
+                                        _buildRow("Kurang Subur", "29 - 32"),
+                                        _buildRow("Tidak Subur", ">32"),
                                       ],
                                     ),
                                   ],
@@ -548,7 +548,7 @@ class _SensorSuhuPageState extends State<SensorSuhuPage> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             IconButton(
-                              icon: const Icon(Icons.calendar_today,
+                              icon: const Icon(Icons.calendar_month,
                                   color: Colors.teal),
                               onPressed: () async {
                                 DateTime? picked = await showDatePicker(
