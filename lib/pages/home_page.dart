@@ -281,20 +281,20 @@ class _HomePageState extends State<HomePage> {
 
     socket!.onConnect((_) {
       print("✅ Connected to socket.io");
-      Fluttertoast.showToast(
-        msg: " Perangkat tersambung",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-      );
+      // Fluttertoast.showToast(
+      //   msg: " Perangkat tersambung",
+      //   toastLength: Toast.LENGTH_SHORT,
+      //   gravity: ToastGravity.BOTTOM,
+      // );
     });
 
     socket!.onDisconnect((_) {
       print("Socket disconnected");
-      Fluttertoast.showToast(
-        msg: "Perangkat terputus",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-      );
+      // Fluttertoast.showToast(
+      //   msg: "Perangkat terputus",
+      //   toastLength: Toast.LENGTH_SHORT,
+      //   gravity: ToastGravity.BOTTOM,
+      // );
     });
 
     socket!.onConnectError((err) {
