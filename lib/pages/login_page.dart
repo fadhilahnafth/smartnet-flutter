@@ -1548,36 +1548,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
-              // Sign Up text di bawah
-              // Positioned(
-              //   bottom: 20,
-              //   left: 0,
-              //   right: 0,
-              //   child: Center(
-              //     child: Row(
-              //       mainAxisAlignment: MainAxisAlignment.center,
-              //       children: [
-              //         Text("Don’t have an account? "),
-              //         GestureDetector(
-              //           onTap: () {
-              //             Navigator.push(
-              //               context,
-              //               MaterialPageRoute(builder: (_) => SignUpPage()),
-              //             );
-              //           },
-              //           child: Text(
-              //             "Sign Up",
-              //             style: TextStyle(
-              //               color: Color(0xFF1666F0),
-              //               fontWeight: FontWeight.bold,
-              //             ),
-              //           ),
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
             ],
           ),
         ),

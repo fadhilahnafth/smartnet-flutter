@@ -667,14 +667,13 @@ class _SensorKaliumPageState extends State<SensorKaliumPage> {
                                         1: FlexColumnWidth(2),
                                       },
                                       children: [
-                                        _buildRow("Indikator", "Kelembaban",
+                                        _buildRow("Indikator", "Kalium",
                                             isHeader: true),
-                                        _buildRow("Tidak Subur", "0 - 30.5"),
-                                        _buildRow(
-                                            "Kurang Subur", "30.6 - 65.5"),
-                                        _buildRow("Subur", "65.6 - 155.5"),
-                                        _buildRow("Kurang Subur", ">155"),
-                                        // _buildRow("Tidak Subur", "8 - 14"),
+                                        _buildRow("Tidak Subur", "< 10"),
+                                        _buildRow("Kurang Subur", "10 - 20"),
+                                        _buildRow("Subur", "21 - 50"),
+                                        _buildRow("Kurang Subur", "51 - 100"),
+                                        _buildRow("Tidak Subur", ">100"),
                                       ],
                                     ),
                                   ],
@@ -740,7 +739,7 @@ class _SensorKaliumPageState extends State<SensorKaliumPage> {
                               minX: 0,
                               maxX: 23,
                               minY: 0,
-                              maxY: 100,
+                              maxY: 200,
                               backgroundColor: Colors.white,
                               lineTouchData: LineTouchData(
                                 touchTooltipData: LineTouchTooltipData(
@@ -772,7 +771,7 @@ class _SensorKaliumPageState extends State<SensorKaliumPage> {
                                 leftTitles: AxisTitles(
                                   sideTitles: SideTitles(
                                     showTitles: true,
-                                    interval: 10,
+                                    interval: 20,
                                     getTitlesWidget: (value, meta) => Text(
                                       '${value.toInt()}',
                                       style: TextStyle(fontSize: yAxisFontSize),

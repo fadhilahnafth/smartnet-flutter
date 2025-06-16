@@ -717,9 +717,9 @@ class _SensorKelembabanPageState extends State<SensorKelembabanPage> {
                                       children: [
                                         _buildRow("Indikator", "Kelembaban",
                                             isHeader: true),
-                                        _buildRow("Tidak Subur", "<50"),
-                                        _buildRow("Kurang Subur", "50 - 70"),
-                                        _buildRow("Subur", "70 - 90"),
+                                        _buildRow("Tidak Subur", "<30"),
+                                        _buildRow("Kurang Subur", "30 - 33"),
+                                        _buildRow("Subur", "33 - 90"),
                                         _buildRow("Kurang Subur", ">90"),
                                         // _buildRow("Tidak Subur", "8 - 14"),
                                       ],
@@ -758,7 +758,7 @@ class _SensorKelembabanPageState extends State<SensorKelembabanPage> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             IconButton(
-                              icon: const Icon(Icons.calendar_today,
+                              icon: const Icon(Icons.calendar_month_outlined,
                                   color: Colors.teal),
                               onPressed: () async {
                                 DateTime? picked = await showDatePicker(

@@ -669,11 +669,11 @@ class _SensorPhosporPageState extends State<SensorPhosporPage> {
                                       children: [
                                         _buildRow("Indikator", "Kelembaban",
                                             isHeader: true),
-                                        _buildRow("Tidak Subur", "0 - 3"),
-                                        _buildRow("Kurang Subur", "3 - 6.1"),
-                                        _buildRow("Subur", "6.1 - 12.2"),
-                                        _buildRow("Kurang Subur", ">12.2"),
-                                        // _buildRow("Tidak Subur", "8 - 14"),
+                                        _buildRow("Tidak Subur", "< 21"),
+                                        _buildRow("Kurang Subur", "21 - 39"),
+                                        _buildRow("Subur", "40 - 60"),
+                                        _buildRow("Kurang Subur", "61-100"),
+                                        _buildRow("Tidak Subur", ">100"),
                                       ],
                                     ),
                                   ],
@@ -739,7 +739,7 @@ class _SensorPhosporPageState extends State<SensorPhosporPage> {
                               minX: 0,
                               maxX: 23,
                               minY: 0,
-                              maxY: 100,
+                              maxY: 200,
                               backgroundColor: Colors.white,
                               lineTouchData: LineTouchData(
                                 touchTooltipData: LineTouchTooltipData(
@@ -771,7 +771,7 @@ class _SensorPhosporPageState extends State<SensorPhosporPage> {
                                 leftTitles: AxisTitles(
                                   sideTitles: SideTitles(
                                     showTitles: true,
-                                    interval: 10,
+                                    interval: 20,
                                     getTitlesWidget: (value, meta) => Text(
                                       '${value.toInt()}',
                                       style: TextStyle(fontSize: yAxisFontSize),

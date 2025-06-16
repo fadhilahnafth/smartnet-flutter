@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'message_detail_page.dart';
+import 'dart:async';
 // class MessagePage extends StatelessWidget {
 //   @override
 //   Widget build(BuildContext context) {
@@ -121,8 +124,174 @@ import 'message_detail_page.dart';
 //     );
 //   }
 // }
+//
+//
+//
+//
+//
+// class MessagePage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text("MESSAGE", style: TextStyle(fontWeight: FontWeight.bold)),
+//         backgroundColor: Colors.white,
+//         foregroundColor: Colors.black,
+//         elevation: 1,
+//       ),
+//       body: StreamBuilder<QuerySnapshot>(
+//         stream: FirebaseFirestore.instance
+//             .collection('messages')
+//             .orderBy('timestamp', descending: true)
+//             .snapshots(),
+//         builder: (context, snapshot) {
+//           if (snapshot.hasError) {
+//             return Center(child: Text('Terjadi kesalahan'));
+//           }
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return Center(child: CircularProgressIndicator());
+//           }
 
-class MessagePage extends StatelessWidget {
+//           final messages = snapshot.data!.docs;
+
+//           if (messages.isEmpty) {
+//             return Center(child: Text("Belum ada pesan."));
+//           }
+
+//           return ListView.builder(
+//             itemCount: messages.length,
+//             itemBuilder: (context, index) {
+//               final data = messages[index].data() as Map<String, dynamic>;
+//               final sensorName = data['sensorName'] ?? '-';
+//               final message = data['message'] ?? '-';
+//               final timestamp = (data['timestamp'] as Timestamp).toDate();
+
+//               return ListTile(
+//                 leading: CircleAvatar(
+//                   backgroundColor: Colors.grey.shade200,
+//                   child: Icon(Icons.warning_amber, color: Colors.red),
+//                 ),
+//                 title: Text(sensorName.toUpperCase(),
+//                     style: TextStyle(fontWeight: FontWeight.bold)),
+//                 subtitle: Text(message),
+//                 trailing: Text(
+//                   "${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}",
+//                   style: TextStyle(fontSize: 12),
+//                 ),
+//                 onTap: () {
+//                   Navigator.push(
+//                     context,
+//                     MaterialPageRoute(
+//                       builder: (_) => MessageDetailPage(
+//                         sensorName: sensorName,
+//                         message: message,
+//                         timestamp: timestamp,
+//                       ),
+//                     ),
+//                   );
+//                 },
+//               );
+//             },
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+class MessagePage extends StatefulWidget {
+  @override
+  State<MessagePage> createState() => _MessagePageState();
+}
+
+class _MessagePageState extends State<MessagePage> {
+  int unreadCount = 0;
+  late StreamSubscription badgeSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupBadgeListener();
+    _setupNotificationListeners();
+  }
+
+  void _setupBadgeListener() {
+    badgeSub = FirebaseFirestore.instance
+        .collection('messages')
+        .where('read', isEqualTo: false)
+        .snapshots()
+        .listen((snap) {
+      setState(() => unreadCount = snap.docs.length);
+    });
+  }
+
+  void _setupNotificationListeners() {
+    FirebaseMessaging.onMessage.listen(_showLocalNotification);
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageTap);
+    _checkInitialMessage();
+  }
+
+  void _showLocalNotification(RemoteMessage msg) {
+    final data = msg.notification;
+    final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    flutterLocalNotificationsPlugin.show(
+      id,
+      data?.title ?? 'Pesan Baru',
+      data?.body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          'msg_channel',
+          'Messages',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+      payload: msg.data['sensorName'],
+    );
+  }
+
+  void _handleMessageTap(RemoteMessage msg) {
+    _goToDetail(msg.data['sensorName']);
+  }
+
+  Future<void> _checkInitialMessage() async {
+    final msg = await FirebaseMessaging.instance.getInitialMessage();
+    if (msg != null) _goToDetail(msg.data['sensorName']);
+  }
+
+  void _goToDetail(String sensorName) {
+    final doc = FirebaseFirestore.instance
+        .collection('messages')
+        .where('sensorName', isEqualTo: sensorName)
+        .orderBy('timestamp', descending: true)
+        .limit(1);
+    doc.get().then((snap) {
+      if (snap.docs.isNotEmpty) {
+        final data = snap.docs.first.data();
+        final ts = (data['timestamp'] as Timestamp).toDate();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MessageDetailPage(
+              sensorName: sensorName,
+              message: data['message'],
+              timestamp: ts,
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    badgeSub.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,6 +300,31 @@ class MessagePage extends StatelessWidget {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
+        actions: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(Icons.message),
+              if (unreadCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$unreadCount',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(width: 16),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -171,18 +365,7 @@ class MessagePage extends StatelessWidget {
                   "${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}",
                   style: TextStyle(fontSize: 12),
                 ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MessageDetailPage(
-                        sensorName: sensorName,
-                        message: message,
-                        timestamp: timestamp,
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => _goToDetail(sensorName),
               );
             },
           );

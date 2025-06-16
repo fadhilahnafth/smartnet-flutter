@@ -10,7 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:fluttertoast/fluttertoast.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 // // import 'package:overlay_support/overlay_support.dart'; // Untuk notifikasi lokal
 
 void main() {
@@ -39,6 +39,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     connectToSocket();
+    FirebaseMessaging.instance.subscribeToTopic('sensor_alerts');
     // setupFCM();/
   }
 
@@ -445,7 +446,7 @@ String getStatus(String type, double value) {
     case "Temperature":
       if (value < 18) return "Tidak Subur";
       if (value < 24) return "Kurang Subur";
-      if (value <= 29) return "Subur";
+      if (value <= 32) return "Subur";
       if (value <= 35) return "Kurang Subur";
       return "Tidak Subur";
     case "Soil Moisture":
@@ -460,22 +461,22 @@ String getStatus(String type, double value) {
       if (value <= 8.5) return "Kurang Subur";
       return "Tidak Subur";
     case "Nitrogen":
-      if (value < 75) return "Tidak Subur";
-      if (value < 155) return "Kurang Subur";
-      if (value <= 249) return "Subur";
-      if (value <= 250) return "Kurang Subur";
+      if (value < 10) return "Tidak Subur";
+      if (value < 20) return "Kurang Subur";
+      if (value <= 50) return "Subur";
+      if (value <= 75) return "Kurang Subur";
       return "Tidak Subur";
     case "Phospor":
-      if (value < 3) return "Tidak Subur";
-      if (value < 6) return "Kurang Subur";
-      if (value <= 12) return "Subur";
-      if (value <= 12.1) return "Kurang Subur";
+      if (value < 21) return "Tidak Subur";
+      if (value < 40) return "Kurang Subur";
+      if (value <= 60) return "Subur";
+      if (value <= 100) return "Kurang Subur";
       return "Tidak Subur";
     case "Kalium":
-      if (value < 30.5) return "Tidak Subur";
-      if (value < 65.5) return "Kurang Subur";
-      if (value <= 155.5) return "Subur";
-      if (value <= 156) return "Kurang Subur";
+      if (value < 10) return "Tidak Subur";
+      if (value < 20) return "Kurang Subur";
+      if (value <= 50) return "Subur";
+      if (value <= 100) return "Kurang Subur";
       return "Tidak Subur";
     default:
       return "-";

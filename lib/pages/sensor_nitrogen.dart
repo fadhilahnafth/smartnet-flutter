@@ -1831,11 +1831,11 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                                       children: [
                                         _buildRow("Indikator", "Nitrogen",
                                             isHeader: true),
-                                        _buildRow("Tidak Subur", "0 - 75"),
-                                        _buildRow("Kurang Subur", "75 - 155"),
-                                        _buildRow("Subur", "155 - 250"),
-                                        _buildRow("Kurang Subur", ">250"),
-                                        // _buildRow("Tidak Subur", "8 - 14"),
+                                        _buildRow("Tidak Subur", "< 10"),
+                                        _buildRow("Kurang Subur", "10 - 20"),
+                                        _buildRow("Subur", "21 - 50"),
+                                        _buildRow("Kurang Subur", "51 - 75"),
+                                        _buildRow("Tidak Subur", ">75"),
                                       ],
                                     ),
                                   ],
@@ -1872,7 +1872,7 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             IconButton(
-                              icon: const Icon(Icons.calendar_today,
+                              icon: const Icon(Icons.calendar_month,
                                   color: Colors.teal),
                               onPressed: () async {
                                 DateTime? picked = await showDatePicker(
@@ -1901,7 +1901,7 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                               minX: 0,
                               maxX: 23,
                               minY: 0,
-                              maxY: 100,
+                              maxY: 200,
                               backgroundColor: Colors.white,
                               lineTouchData: LineTouchData(
                                 touchTooltipData: LineTouchTooltipData(
@@ -1933,7 +1933,7 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                                 leftTitles: AxisTitles(
                                   sideTitles: SideTitles(
                                     showTitles: true,
-                                    interval: 10,
+                                    interval: 20,
                                     getTitlesWidget: (value, meta) => Text(
                                       '${value.toInt()}',
                                       style: TextStyle(fontSize: yAxisFontSize),
