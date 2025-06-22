@@ -92,6 +92,7 @@ class _HomePageState extends State<HomePage> {
 
   void updateSensorData(Map<String, dynamic> data) {
     final uplink = data['uplink'] ?? {};
+    final service = SensorValueService();
 
     final double temperature = parseToDouble(uplink['temperature']);
     final double soilMoisture = parseToDouble(uplink['humidity']);
@@ -110,7 +111,7 @@ class _HomePageState extends State<HomePage> {
       sensorData[1]['status'] = getStatus("pH", ph);
       sensorData[1]['statusColor'] = getStatusColor(sensorData[1]['status']);
 
-      sensorData[2]['value'] = '${nitrogen.toStringAsFixed(1)}';
+      sensorData[2]['value'] = '${nitrogen.toStringAsFixed(1)} ppm';
       sensorData[2]['status'] = getStatus("Nitrogen", nitrogen);
       sensorData[2]['statusColor'] = getStatusColor(sensorData[2]['status']);
 
@@ -132,6 +133,13 @@ class _HomePageState extends State<HomePage> {
     checkAndSendMessage("Soil Moisture", sensorData[3]['status']);
     checkAndSendMessage("Kalium", sensorData[4]['status']);
     checkAndSendMessage("Phospor", sensorData[5]['status']);
+
+    service.temperature = temperature;
+    service.ph = ph;
+    service.nitrogen = nitrogen;
+    service.soilMoisture = soilMoisture;
+    service.kalium = kalium;
+    service.phospor = phospor;
   }
 
   Future<void> checkAndSendMessage(String sensorName, String status) async {
@@ -631,3 +639,18 @@ List<Map<String, dynamic>> sensorData = [
     "detailOffsetY": 120.0,
   },
 ];
+
+class SensorValueService {
+  static final SensorValueService _instance = SensorValueService._internal();
+
+  factory SensorValueService() => _instance;
+
+  SensorValueService._internal();
+
+  double temperature = 0.0;
+  double ph = 0.0;
+  double nitrogen = 0.0;
+  double soilMoisture = 0.0;
+  double kalium = 0.0;
+  double phospor = 0.0;
+}

@@ -199,6 +199,8 @@ import 'dart:async';
 //   }
 // }
 
+// import 'package:cloud_firestore/cloud_firestore.dart';
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
@@ -221,7 +223,6 @@ class _MessagePageState extends State<MessagePage> {
   void _setupBadgeListener() {
     badgeSub = FirebaseFirestore.instance
         .collection('messages')
-        .where('read', isEqualTo: false)
         .snapshots()
         .listen((snap) {
       setState(() => unreadCount = snap.docs.length);
@@ -254,36 +255,46 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   void _handleMessageTap(RemoteMessage msg) {
-    _goToDetail(msg.data['sensorName']);
+    final sensorName = msg.data['sensorName'];
+    if (sensorName != null) {
+      _goToDetail(sensorName);
+    }
   }
 
   Future<void> _checkInitialMessage() async {
     final msg = await FirebaseMessaging.instance.getInitialMessage();
-    if (msg != null) _goToDetail(msg.data['sensorName']);
+    if (msg != null && msg.data['sensorName'] != null) {
+      _goToDetail(msg.data['sensorName']);
+    }
   }
 
-  void _goToDetail(String sensorName) {
-    final doc = FirebaseFirestore.instance
+  void _goToDetail(String sensorName) async {
+    final doc = await FirebaseFirestore.instance
         .collection('messages')
-        .where('sensorName', isEqualTo: sensorName)
-        .orderBy('timestamp', descending: true)
-        .limit(1);
-    doc.get().then((snap) {
-      if (snap.docs.isNotEmpty) {
-        final data = snap.docs.first.data();
-        final ts = (data['timestamp'] as Timestamp).toDate();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => MessageDetailPage(
-              sensorName: sensorName,
-              message: data['message'],
-              timestamp: ts,
-            ),
+        .doc(sensorName)
+        .get();
+
+    if (doc.exists) {
+      final data = doc.data()!;
+      final timestamp = data['timestamp'] is Timestamp
+          ? (data['timestamp'] as Timestamp).toDate()
+          : DateTime.now();
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MessageDetailPage(
+            sensorName: sensorName,
+            message: data['message'] ?? 'Tidak ada pesan',
+            timestamp: timestamp,
           ),
-        );
-      }
-    });
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Pesan tidak ditemukan untuk $sensorName')),
+      );
+    }
   }
 
   @override
@@ -305,22 +316,23 @@ class _MessagePageState extends State<MessagePage> {
             alignment: Alignment.center,
             children: [
               Icon(Icons.message),
-              if (unreadCount > 0)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '$unreadCount',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                ),
+              // Optional: Tampilkan badge jumlah pesan
+              // if (unreadCount > 0)
+              // Positioned(
+              //   right: 8,
+              //   top: 8,
+              //   child: Container(
+              //     padding: EdgeInsets.all(4),
+              //     decoration: BoxDecoration(
+              //       color: Colors.red,
+              //       shape: BoxShape.circle,
+              //     ),
+              //     child: Text(
+              //       '$unreadCount',
+              //       style: TextStyle(color: Colors.white, fontSize: 12),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
           SizedBox(width: 16),
@@ -348,7 +360,8 @@ class _MessagePageState extends State<MessagePage> {
           return ListView.builder(
             itemCount: messages.length,
             itemBuilder: (context, index) {
-              final data = messages[index].data() as Map<String, dynamic>;
+              final doc = messages[index];
+              final data = doc.data() as Map<String, dynamic>;
               final sensorName = data['sensorName'] ?? '-';
               final message = data['message'] ?? '-';
               final timestamp = (data['timestamp'] as Timestamp).toDate();
@@ -362,7 +375,7 @@ class _MessagePageState extends State<MessagePage> {
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(message),
                 trailing: Text(
-                  "${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}",
+                  "${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}",
                   style: TextStyle(fontSize: 12),
                 ),
                 onTap: () => _goToDetail(sensorName),

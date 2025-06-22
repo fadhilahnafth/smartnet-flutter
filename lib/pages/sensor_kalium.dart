@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:smart_agriculture_jadi/pages/home_page.dart';
+// import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 // class SensorKaliumPage extends StatelessWidget {
 //   final CollectionReference uplinksRef =
@@ -498,59 +499,365 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 //   }
 // }
 
+// class SensorKaliumPage extends StatefulWidget {
+//   @override
+//   _SensorKaliumPageState createState() => _SensorKaliumPageState();
+// }
+
+// _SensorKaliumPageState createState() => _SensorKaliumPageState();
+
+// class _SensorKaliumPageState extends State<SensorKaliumPage> {
+//   final CollectionReference uplinksRef =
+//       FirebaseFirestore.instance.collection('uplink-p2p');
+
+//   IO.Socket? socket;
+//   double latestPotassium = 0.0;
+//   DateTime? _selectedDate;
+//   double xAxisFontSize = 12;
+//   double yAxisFontSize = 12;
+//   // List<FlSpot> _realtimeData = [];
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     connectToSocket();
+//   }
+
+//   void connectToSocket() {
+//     print("Trying to connect to socket.io...");
+//     socket = IO.io("https://webhook.ktyudha.site", <String, dynamic>{
+//       'transports': ['websocket'],
+//       'secure': true,
+//     });
+
+//     socket!.onConnect((_) {
+//       print("\u2705 Connected to socket.io");
+//     });
+
+//     socket!.onDisconnect((_) => print("Socket disconnected"));
+//     socket!.onConnectError((err) => print("Socket connect error: $err"));
+//     socket!.onError((err) => print("Socket error: $err"));
+
+//     socket!.on('send-uplink-p2p', (data) {
+//       final potassiumValue =
+//           double.tryParse(data['uplink']['potassium']) ?? 0.0;
+//       setState(() {
+//         latestPotassium = potassiumValue;
+//       });
+//     });
+//   }
+
+//   @override
+//   void dispose() {
+//     socket?.disconnect();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     DateTime startOfDay;
+//     DateTime endOfDay;
+
+//     if (_selectedDate != null) {
+//       startOfDay = DateTime(
+//           _selectedDate!.year, _selectedDate!.month, _selectedDate!.day);
+//       endOfDay = startOfDay.add(Duration(days: 1));
+//     } else {
+//       endOfDay = DateTime.now();
+//       startOfDay = endOfDay.subtract(Duration(hours: 24));
+//     }
+//     final startEpoch = startOfDay.millisecondsSinceEpoch;
+//     final endEpoch = endOfDay.millisecondsSinceEpoch;
+
+//     print('Selected date: $_selectedDate');
+//     print('Start epoch: $startEpoch');
+//     print('End epoch: $endEpoch');
+
+//     return Scaffold(
+//       backgroundColor: const Color(0xFFEAEAE3),
+//       appBar: AppBar(
+//         backgroundColor: Colors.white,
+//         title: const Text("Detail Sensor Kalium",
+//             style: TextStyle(color: Colors.black)),
+//         iconTheme: const IconThemeData(color: Colors.black),
+//         elevation: 0,
+//       ),
+//       body: FutureBuilder<QuerySnapshot>(
+//         future: uplinksRef
+//             .orderBy('timestamp', descending: true)
+//             .where('timestamp', isGreaterThanOrEqualTo: startEpoch)
+//             .where('timestamp', isLessThan: endEpoch)
+//             .get(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//           if (snapshot.hasError) {
+//             return Center(child: Text('Terjadi error: ${snapshot.error}'));
+//           }
+
+//           final docs = snapshot.data?.docs ?? [];
+//           final hasData = docs.isNotEmpty;
+
+//           List<FlSpot> potassiumPoints = [];
+
+//           for (int i = 0; i < docs.length; i++) {
+//             final data = docs[i].data() as Map<String, dynamic>;
+//             final timestamp = data['timestamp'] ?? 0;
+//             final time = DateTime.fromMillisecondsSinceEpoch(timestamp);
+//             final hour = time.hour.toDouble();
+
+//             final uplink = data['uplink'] ?? {};
+//             final potassiumValue =
+//                 double.tryParse(uplink['potassium']?.toString() ?? '') ?? 0.0;
+
+//             potassiumPoints.add(FlSpot(hour, potassiumValue));
+//           }
+
+//           if (!hasData) {
+//             potassiumPoints = [const FlSpot(0, 0)];
+//           }
+
+//           return SingleChildScrollView(
+//             padding: const EdgeInsets.all(16),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.center,
+//               children: [
+//                 Container(
+//                   width: double.infinity,
+//                   padding: const EdgeInsets.all(16),
+//                   decoration: BoxDecoration(
+//                     color: Colors.white,
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: Stack(
+//                     children: [
+//                       Align(
+//                         alignment: Alignment.center,
+//                         child: Column(
+//                           mainAxisSize: MainAxisSize.min,
+//                           children: [
+//                             const Text("Kalium",
+//                                 style: TextStyle(
+//                                     fontSize: 20, fontWeight: FontWeight.bold)),
+//                             Text("${latestPotassium.toStringAsFixed(2)} ",
+//                                 style: const TextStyle(
+//                                     fontSize: 18, color: Colors.teal)),
+//                           ],
+//                         ),
+//                       ),
+//                       Positioned(
+//                         top: 0,
+//                         right: 0,
+//                         child: IconButton(
+//                           icon: const Icon(Icons.info_outline,
+//                               color: Colors.teal),
+//                           onPressed: () {
+//                             showDialog(
+//                               context: context,
+//                               builder: (_) => AlertDialog(
+//                                 title: const Text("Indikator Kalium"),
+//                                 content: Column(
+//                                   mainAxisSize: MainAxisSize.min,
+//                                   children: [
+//                                     Table(
+//                                       border: TableBorder.all(
+//                                           color: Colors.grey.shade300),
+//                                       columnWidths: const {
+//                                         0: FlexColumnWidth(2),
+//                                         1: FlexColumnWidth(2),
+//                                       },
+//                                       children: [
+//                                         _buildRow("Indikator", "Kalium",
+//                                             isHeader: true),
+//                                         _buildRow("Tidak Subur", "< 10"),
+//                                         _buildRow("Kurang Subur", "10 - 20"),
+//                                         _buildRow("Subur", "21 - 50"),
+//                                         _buildRow("Kurang Subur", "51 - 100"),
+//                                         _buildRow("Tidak Subur", ">100"),
+//                                       ],
+//                                     ),
+//                                   ],
+//                                 ),
+//                                 actions: [
+//                                   TextButton(
+//                                     child: const Text("Tutup"),
+//                                     onPressed: () => Navigator.pop(context),
+//                                   )
+//                                 ],
+//                               ),
+//                             );
+//                           },
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 const SizedBox(height: 30),
+//                 Card(
+//                   shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(12)),
+//                   elevation: 2,
+//                   color: Colors.white,
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(16.0),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                           children: [
+//                             const Text("Grafik Sensor Kalium",
+//                                 style: TextStyle(
+//                                     fontWeight: FontWeight.bold, fontSize: 16)),
+//                             IconButton(
+//                               icon: const Icon(Icons.calendar_month,
+//                                   color: Colors.teal),
+//                               onPressed: () async {
+//                                 DateTime? picked = await showDatePicker(
+//                                   context: context,
+//                                   initialDate: _selectedDate ?? DateTime.now(),
+//                                   firstDate: DateTime(2025),
+//                                   lastDate: DateTime.now(),
+//                                 );
+//                                 if (picked != null) {
+//                                   setState(() {
+//                                     _selectedDate = picked;
+//                                   });
+//                                 }
+//                               },
+//                             ),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 10),
+//                         if (!hasData)
+//                           const Center(
+//                               child: Text("Tidak ada data pada tanggal ini.")),
+//                         SizedBox(
+//                           height: 300,
+//                           child: LineChart(
+//                             LineChartData(
+//                               minX: 0,
+//                               maxX: 23,
+//                               minY: 0,
+//                               maxY: 200,
+//                               backgroundColor: Colors.white,
+//                               lineTouchData: LineTouchData(
+//                                 touchTooltipData: LineTouchTooltipData(
+//                                   tooltipBgColor:
+//                                       Colors.blueGrey.withOpacity(0.7),
+//                                   getTooltipItems: (spots) => spots
+//                                       .map((spot) => LineTooltipItem(
+//                                             '${spot.y.toStringAsFixed(1)} ppm',
+//                                             const TextStyle(
+//                                                 color: Colors.white),
+//                                           ))
+//                                       .toList(),
+//                                 ),
+//                                 handleBuiltInTouches: true,
+//                                 enabled: true,
+//                               ),
+//                               gridData: FlGridData(show: false),
+//                               titlesData: FlTitlesData(
+//                                 bottomTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 4,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                       '${value.toInt()}',
+//                                       style: TextStyle(fontSize: xAxisFontSize),
+//                                     ),
+//                                   ),
+//                                 ),
+//                                 leftTitles: AxisTitles(
+//                                   sideTitles: SideTitles(
+//                                     showTitles: true,
+//                                     interval: 20,
+//                                     getTitlesWidget: (value, meta) => Text(
+//                                       '${value.toInt()}',
+//                                       style: TextStyle(fontSize: yAxisFontSize),
+//                                     ),
+//                                   ),
+//                                 ),
+//                                 topTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                                 rightTitles: AxisTitles(
+//                                     sideTitles: SideTitles(showTitles: false)),
+//                               ),
+//                               borderData: FlBorderData(show: false),
+//                               lineBarsData: [
+//                                 LineChartBarData(
+//                                   spots: potassiumPoints,
+//                                   isCurved: true,
+//                                   isStrokeCapRound: true,
+//                                   barWidth: 4,
+//                                   gradient: const LinearGradient(
+//                                       colors: [Colors.teal, Colors.green]),
+//                                   dotData: FlDotData(show: true),
+//                                   belowBarData: BarAreaData(
+//                                     show: true,
+//                                     gradient: LinearGradient(
+//                                       colors: [
+//                                         Colors.teal.withOpacity(0.3),
+//                                         Colors.green.withOpacity(0.2),
+//                                       ],
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ],
+//                               clipData: FlClipData.all(),
+//                               showingTooltipIndicators: [],
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   TableRow _buildRow(String indikator, String rentang,
+//       {bool isHeader = false}) {
+//     return TableRow(
+//       children: [
+//         _buildCell(indikator, isHeader: isHeader),
+//         _buildCell(rentang, isHeader: isHeader),
+//       ],
+//     );
+//   }
+
+//   Widget _buildCell(String text, {bool isHeader = false}) {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: Text(
+//         text,
+//         style: TextStyle(
+//           fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+//           color: isHeader ? Colors.black : Colors.grey[800],
+//         ),
+//         textAlign: TextAlign.center,
+//       ),
+//     );
+//   }
+// }
 class SensorKaliumPage extends StatefulWidget {
   @override
   _SensorKaliumPageState createState() => _SensorKaliumPageState();
 }
 
-_SensorKaliumPageState createState() => _SensorKaliumPageState();
-
 class _SensorKaliumPageState extends State<SensorKaliumPage> {
   final CollectionReference uplinksRef =
       FirebaseFirestore.instance.collection('uplink-p2p');
 
-  IO.Socket? socket;
-  double latestPotassium = 0.0;
   DateTime? _selectedDate;
   double xAxisFontSize = 12;
   double yAxisFontSize = 12;
-  // List<FlSpot> _realtimeData = [];
-
-  @override
-  void initState() {
-    super.initState();
-    connectToSocket();
-  }
-
-  void connectToSocket() {
-    print("Trying to connect to socket.io...");
-    socket = IO.io("https://webhook.ktyudha.site", <String, dynamic>{
-      'transports': ['websocket'],
-      'secure': true,
-    });
-
-    socket!.onConnect((_) {
-      print("\u2705 Connected to socket.io");
-    });
-
-    socket!.onDisconnect((_) => print("Socket disconnected"));
-    socket!.onConnectError((err) => print("Socket connect error: $err"));
-    socket!.onError((err) => print("Socket error: $err"));
-
-    socket!.on('send-uplink-p2p', (data) {
-      final potassiumValue =
-          double.tryParse(data['uplink']['potassium']) ?? 0.0;
-      setState(() {
-        latestPotassium = potassiumValue;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    socket?.disconnect();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -565,12 +872,9 @@ class _SensorKaliumPageState extends State<SensorKaliumPage> {
       endOfDay = DateTime.now();
       startOfDay = endOfDay.subtract(Duration(hours: 24));
     }
+
     final startEpoch = startOfDay.millisecondsSinceEpoch;
     final endEpoch = endOfDay.millisecondsSinceEpoch;
-
-    print('Selected date: $_selectedDate');
-    print('Start epoch: $startEpoch');
-    print('End epoch: $endEpoch');
 
     return Scaffold(
       backgroundColor: const Color(0xFFEAEAE3),
@@ -639,7 +943,8 @@ class _SensorKaliumPageState extends State<SensorKaliumPage> {
                             const Text("Kalium",
                                 style: TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold)),
-                            Text("${latestPotassium.toStringAsFixed(2)} ",
+                            Text(
+                                "${SensorValueService().kalium.toStringAsFixed(2)} ppm",
                                 style: const TextStyle(
                                     fontSize: 18, color: Colors.teal)),
                           ],
@@ -739,7 +1044,7 @@ class _SensorKaliumPageState extends State<SensorKaliumPage> {
                               minX: 0,
                               maxX: 23,
                               minY: 0,
-                              maxY: 200,
+                              maxY: 100,
                               backgroundColor: Colors.white,
                               lineTouchData: LineTouchData(
                                 touchTooltipData: LineTouchTooltipData(
@@ -761,7 +1066,7 @@ class _SensorKaliumPageState extends State<SensorKaliumPage> {
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
                                     showTitles: true,
-                                    interval: 4,
+                                    interval: 2,
                                     getTitlesWidget: (value, meta) => Text(
                                       '${value.toInt()}',
                                       style: TextStyle(fontSize: xAxisFontSize),
@@ -771,7 +1076,7 @@ class _SensorKaliumPageState extends State<SensorKaliumPage> {
                                 leftTitles: AxisTitles(
                                   sideTitles: SideTitles(
                                     showTitles: true,
-                                    interval: 20,
+                                    interval: 10,
                                     getTitlesWidget: (value, meta) => Text(
                                       '${value.toInt()}',
                                       style: TextStyle(fontSize: yAxisFontSize),

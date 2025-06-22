@@ -51,76 +51,6 @@ class ReportDetailPage extends StatelessWidget {
     );
   }
 
-  // Future<void> _exportCSV(BuildContext context) async {
-  //   final start =
-  //       DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
-  //   final end = start.add(Duration(days: 1));
-  //   final startEpoch = start.millisecondsSinceEpoch;
-  //   final endEpoch = end.millisecondsSinceEpoch;
-
-  //   final snapshot = await FirebaseFirestore.instance
-  //       .collection('uplink-p2p')
-  //       .where('timestamp', isGreaterThanOrEqualTo: startEpoch)
-  //       .where('timestamp', isLessThan: endEpoch)
-  //       .orderBy('timestamp')
-  //       .get();
-
-  //   final rows = [
-  //     [
-  //       "No",
-  //       "Time",
-  //       "Temperature",
-  //       "Humidity",
-  //       "pH",
-  //       "Nitrogen",
-  //       "Phosphorus",
-  //       "Potassium"
-  //     ]
-  //   ];
-
-  //   int index = 1;
-  //   for (var doc in snapshot.docs) {
-  //     final data = doc.data();
-  //     final timestamp = data['timestamp'] ?? 0;
-  //     final time = DateTime.fromMillisecondsSinceEpoch(timestamp);
-  //     final timeStr =
-  //         "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
-
-  //     final uplink = data['uplink'] ?? {};
-
-  //     rows.add([
-  //       "$index",
-  //       timeStr,
-  //       uplink['temperature']?.toString() ?? '',
-  //       uplink['humidity']?.toString() ?? '',
-  //       uplink['ph']?.toString() ?? '',
-  //       uplink['nitrogen']?.toString() ?? '',
-  //       uplink['phosphorus']?.toString() ?? '',
-  //       uplink['potassium']?.toString() ?? '',
-  //     ]);
-  //     index++;
-  //   }
-
-  //   final csvData = const ListToCsvConverter().convert(rows);
-
-  //   if (await Permission.storage.request().isGranted) {
-  //     final downloads = Directory('/storage/emulated/0/Download');
-  //     final fileName =
-  //         "report-${DateFormat('yyyy-MM-dd').format(selectedDate)}.csv";
-  //     final path = "${downloads.path}/$fileName";
-  //     final file = File(path);
-  //     await file.writeAsString(csvData);
-
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //           content: Text("Report disimpan di folder Download: $fileName")),
-  //     );
-  //   } else {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text("Izin akses penyimpanan ditolak.")),
-  //     );
-  //   }
-  // }
   Future<void> _exportCSV(BuildContext context) async {
     final start =
         DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
@@ -153,8 +83,10 @@ class ReportDetailPage extends StatelessWidget {
       final data = doc.data();
       final timestamp = data['timestamp'] ?? 0;
       final time = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      final timeStr =
-          "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+      final timeStr = "${time.hour.toString().padLeft(2, '0')}:"
+          "${time.minute.toString().padLeft(2, '0')}:"
+          "${time.second.toString().padLeft(2, '0')}:"
+          "${time.millisecond.toString().padLeft(3, '0')}";
 
       final uplink = data['uplink'] ?? {};
 
@@ -178,6 +110,7 @@ class ReportDetailPage extends StatelessWidget {
       final now = DateTime.now();
       final timestamp =
           "${now.year}${now.month}${now.day}_${now.hour}${now.minute}${now.second}";
+
       final fileName =
           "report-${DateFormat('yyyy-MM-dd').format(selectedDate)}-$timestamp.csv";
       final filePath = "${downloadsDir.path}/$fileName";
@@ -254,7 +187,7 @@ class ReportDetailPage extends StatelessWidget {
                     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                     columnWidths: const {
                       0: FixedColumnWidth(45),
-                      1: FixedColumnWidth(50),
+                      1: FixedColumnWidth(90),
                       2: FixedColumnWidth(88),
                       3: FixedColumnWidth(68),
                       4: FixedColumnWidth(50),
@@ -280,7 +213,12 @@ class ReportDetailPage extends StatelessWidget {
                         final time =
                             DateTime.fromMillisecondsSinceEpoch(timestamp);
                         final timeStr =
-                            "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+                            // "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+
+                            "${time.hour.toString().padLeft(2, '0')}:"
+                            "${time.minute.toString().padLeft(2, '0')}:"
+                            "${time.second.toString().padLeft(2, '0')}:"
+                            "${time.millisecond.toString().padLeft(3, '0')}";
 
                         final uplink = item['uplink'] ?? {};
 
