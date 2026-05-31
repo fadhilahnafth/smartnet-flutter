@@ -2215,7 +2215,7 @@ class _SensorNitrogenPageState extends State<SensorNitrogenPage> {
                                       Colors.blueGrey.withOpacity(0.7),
                                   getTooltipItems: (spots) => spots
                                       .map((spot) => LineTooltipItem(
-                                            '${spot.y.toStringAsFixed(1)} ppm',
+                                            '${spot.y.toStringAsFixed(1)} mg/kg',
                                             const TextStyle(
                                                 color: Colors.white),
                                           ))

@@ -81,6 +81,31 @@ void main() async {
   const InitializationSettings initializationSettings =
       InitializationSettings(android: initializationSettingsAndroid);
 
+  // await flutterLocalNotificationsPlugin.initialize(
+  //   initializationSettings,
+  //   onDidReceiveNotificationResponse: (response) {
+  //     final payload = response.payload;
+  //     if (payload != null) {
+  //       final parts = payload.split('|');
+  //       if (parts.length == 3) {
+  //         final sensorName = parts[0];
+  //         final message = parts[1];
+  //         final timestamp = DateTime.tryParse(parts[2]) ?? DateTime.now();
+
+  //         navigatorKey.currentState?.push(
+  //           MaterialPageRoute(
+  //             builder: (_) => MessageDetailPage(
+  //               sensorName: sensorName,
+  //               message: message,
+  //               timestamp: timestamp,
+  //             ),
+  //           ),
+  //         );
+  //       }
+  //     }
+  //   },
+  // );
+
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
     onDidReceiveNotificationResponse: (response) {
@@ -110,6 +135,31 @@ void main() async {
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+Future<void> showLocalNotification(
+    String title, String body, String payload) async {
+  final int notificationId =
+      DateTime.now().millisecondsSinceEpoch.remainder(100000);
+
+  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    'sensor_channel_id',
+    'Sensor Alerts',
+    importance: Importance.max,
+    priority: Priority.high,
+  );
+
+  const NotificationDetails platformDetails = NotificationDetails(
+    android: androidDetails,
+  );
+
+  await flutterLocalNotificationsPlugin.show(
+    notificationId,
+    title,
+    body,
+    platformDetails,
+    payload: payload,
+  );
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

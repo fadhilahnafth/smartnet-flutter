@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 // // import 'package:overlay_support/overlay_support.dart'; // Untuk notifikasi lokal
 
 void main() {
@@ -32,6 +33,58 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+// Future<void> showLocalNotification(
+//     String title, String body, String payload) async {
+//   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+//     'sensor_channel_id',
+//     'Sensor Alerts',
+//     channelDescription: 'Notifikasi untuk kondisi sensor tidak subur',
+//     importance: Importance.max,
+//     priority: Priority.high,
+//     ticker: 'ticker',
+//   );
+
+//   const NotificationDetails platformDetails = NotificationDetails(
+//     android: androidDetails,
+//   );
+
+//   await flutterLocalNotificationsPlugin.show(
+//     0,
+//     title,
+//     body,
+//     platformDetails,
+//     payload: payload,
+//   );
+// }
+
+Future<void> showLocalNotification(
+    String title, String body, String payload) async {
+  final int notificationId =
+      DateTime.now().millisecondsSinceEpoch.remainder(100000); // ✅ ID unik
+
+  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    'sensor_channel_id',
+    'Sensor Alerts',
+    importance: Importance.max,
+    priority: Priority.high,
+  );
+
+  const NotificationDetails platformDetails = NotificationDetails(
+    android: androidDetails,
+  );
+
+  await flutterLocalNotificationsPlugin.show(
+    notificationId,
+    title,
+    body,
+    platformDetails,
+    payload: payload,
+  );
+}
+
 class _HomePageState extends State<HomePage> {
   IO.Socket? socket;
 
@@ -46,7 +99,7 @@ class _HomePageState extends State<HomePage> {
   void connectToSocket() {
     print("Trying to connect to socket.io...");
 
-    socket = IO.io("https://webhook.ktyudha.site", <String, dynamic>{
+    socket = IO.io("https://api-smartnet.inb.my.id", <String, dynamic>{
       'transports': ['websocket'],
       'secure': true,
     });
@@ -81,11 +134,11 @@ class _HomePageState extends State<HomePage> {
       print("Received send-uplink-p2p: $data");
       if (data is Map<String, dynamic>) {
         updateSensorData(data);
-        Fluttertoast.showToast(
-          msg: "Menerima Data",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-        );
+        // Fluttertoast.showToast(
+        //   // msg: "",
+        //   // toastLength: Toast.LENGTH_SHORT,
+        //   // gravity: ToastGravity.BOTTOM,
+        // );
       }
     });
   }
@@ -111,7 +164,7 @@ class _HomePageState extends State<HomePage> {
       sensorData[1]['status'] = getStatus("pH", ph);
       sensorData[1]['statusColor'] = getStatusColor(sensorData[1]['status']);
 
-      sensorData[2]['value'] = '${nitrogen.toStringAsFixed(1)} ppm';
+      sensorData[2]['value'] = '${nitrogen.toStringAsFixed(1)} mg/kg';
       sensorData[2]['status'] = getStatus("Nitrogen", nitrogen);
       sensorData[2]['statusColor'] = getStatusColor(sensorData[2]['status']);
 
@@ -119,11 +172,11 @@ class _HomePageState extends State<HomePage> {
       sensorData[3]['status'] = getStatus("Soil Moisture", soilMoisture);
       sensorData[3]['statusColor'] = getStatusColor(sensorData[3]['status']);
 
-      sensorData[4]['value'] = '$kalium ppm';
+      sensorData[4]['value'] = '$kalium mg/kg';
       sensorData[4]['status'] = getStatus("Kalium", kalium);
       sensorData[4]['statusColor'] = getStatusColor(sensorData[4]['status']);
 
-      sensorData[5]['value'] = '$phospor ppm';
+      sensorData[5]['value'] = '$phospor mg/kg';
       sensorData[5]['status'] = getStatus("Phospor", phospor);
       sensorData[5]['statusColor'] = getStatusColor(sensorData[5]['status']);
     });
@@ -142,6 +195,28 @@ class _HomePageState extends State<HomePage> {
     service.phospor = phospor;
   }
 
+  // Future<void> checkAndSendMessage(String sensorName, String status) async {
+  //   if (status != "Tidak Subur") return;
+
+  //   final now = DateTime.now();
+  //   final docRef =
+  //       FirebaseFirestore.instance.collection('messages').doc(sensorName);
+  //   final doc = await docRef.get();
+
+  //   final lastSent =
+  //       doc.exists ? (doc['lastSent'] as Timestamp).toDate() : DateTime(2000);
+  //   final difference = now.difference(lastSent);
+
+  //   if (difference.inMinutes >= 1) {
+  //     await docRef.set({
+  //       'sensorName': sensorName,
+  //       'message': 'Sensor $sensorName tidak subur.',
+  //       'timestamp': Timestamp.now(),
+  //       'lastSent': Timestamp.now(),
+  //     }, SetOptions(merge: true));
+  //     print("Pesan dikirim untuk sensor $sensorName");
+  //   }
+  // }
   Future<void> checkAndSendMessage(String sensorName, String status) async {
     if (status != "Tidak Subur") return;
 
@@ -155,13 +230,28 @@ class _HomePageState extends State<HomePage> {
     final difference = now.difference(lastSent);
 
     if (difference.inMinutes >= 1) {
+      final messageText = 'Sensor $sensorName tidak subur.';
+      final payload = "$sensorName|$messageText|${now.toIso8601String()}";
+
       await docRef.set({
         'sensorName': sensorName,
-        'message': 'Sensor $sensorName tidak subur.',
+        'message': messageText,
         'timestamp': Timestamp.now(),
         'lastSent': Timestamp.now(),
       }, SetOptions(merge: true));
-      print("Pesan dikirim untuk sensor $sensorName");
+
+      // Panggil notifikasi lokal
+      // await showLocalNotification(
+      //   sensorName,
+      //   messageText,
+      //   "$sensorName|$messageText|${now.toIso8601String()}",
+      // );
+      await showLocalNotification(
+        "Peringatan: $sensorName",
+        messageText,
+        payload,
+      );
+      print("📢 Notifikasi dikirim untuk sensor $sensorName");
     }
   }
 
@@ -556,7 +646,7 @@ List<Map<String, dynamic>> sensorData = [
     "iconSize": 45.0,
     "iconOffsetX": 15.0,
     "iconOffsetY": 40.0,
-    "valueOffsetX": 75.0,
+    "valueOffsetX": 65.0,
     "valueOffsetY": 50.0,
     "valueFontSize": 20.0,
     "title": "Nitrogen",
@@ -599,7 +689,7 @@ List<Map<String, dynamic>> sensorData = [
     "iconSize": 45.0,
     "iconOffsetX": 10.0,
     "iconOffsetY": 40.0,
-    "valueOffsetX": 70.0,
+    "valueOffsetX": 57.0,
     "valueOffsetY": 50.0,
     "valueFontSize": 20.0,
     "title": "Kalium",
@@ -621,7 +711,7 @@ List<Map<String, dynamic>> sensorData = [
     "iconSize": 45.0,
     "iconOffsetX": 10.0,
     "iconOffsetY": 40.0,
-    "valueOffsetX": 70.0,
+    "valueOffsetX": 57.0,
     "valueOffsetY": 50.0,
     "valueFontSize": 20.0,
     "title": "Phospor",

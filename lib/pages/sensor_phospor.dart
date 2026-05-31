@@ -1053,7 +1053,7 @@ class _SensorPhosporPageState extends State<SensorPhosporPage> {
                                       Colors.blueGrey.withOpacity(0.7),
                                   getTooltipItems: (spots) => spots
                                       .map((spot) => LineTooltipItem(
-                                            '${spot.y.toStringAsFixed(1)} ppm',
+                                            '${spot.y.toStringAsFixed(1)} mg/kg',
                                             const TextStyle(
                                                 color: Colors.white),
                                           ))
