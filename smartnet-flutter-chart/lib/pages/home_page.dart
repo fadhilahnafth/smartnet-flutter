@@ -297,7 +297,7 @@ class _HomePageState extends State<HomePage> {
       gravity: ToastGravity.BOTTOM,
     );
 
-    await Future.delayed(Duration(seconds: 1)); // untuk animasi refresh
+    await Future.delayed(Duration(seconds: 1)); // untuk animasi refresh
   }
 
   @override
