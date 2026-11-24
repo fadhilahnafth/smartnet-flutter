@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "1049076270818",
+    "project_id": "lora-multihop",
+    "storage_bucket": "lora-multihop.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1049076270818:android:4d9e197980f4d36d7200bb",
+        "android_client_info": {
+          "package_name": "com.example.smart_agriculture_jadi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1049076270818-b4l6sufbp8ek4eqkrj6d47ir8a1913q2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.smart_agriculture_jadi",
+            "certificate_hash": "d1cc072f07ac0288268c0927b4e54930b1c3c2c9"
+          }
+        },
+        {
+          "client_id": "1049076270818-vd8hb79gbcmft4i8td1j684mghb436qm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.smart_agriculture_jadi",
+            "certificate_hash": "62ca292aff13200383a4878f4d5dc98d6803827b"
+          }
+        },
+        {
+          "client_id": "1049076270818-taql28ok0l2stmg4fduhcjsp1eunh1rv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5iT04_hiyfcxSdVI51oIPsyyA5sm3dIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1049076270818-taql28ok0l2stmg4fduhcjsp1eunh1rv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1049076270818-22l88bft7rrkdv994r75qjrqefacj7dv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.smartAgricultureJadi"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
