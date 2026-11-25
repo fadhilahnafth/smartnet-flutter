@@ -8,6 +8,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:smart_agriculture_jadi/pages/message_detail_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 // void main() async {
 //   WidgetsFlutterBinding.ensureInitialized();
 //   await Firebase.initializeApp(
@@ -112,20 +114,9 @@ void main() async {
       final payload = response.payload;
       if (payload != null) {
         final parts = payload.split('|');
-        if (parts.length == 3) {
+        if (parts.length >= 1) {
           final sensorName = parts[0];
-          final message = parts[1];
-          final timestamp = DateTime.tryParse(parts[2]) ?? DateTime.now();
-
-          navigatorKey.currentState?.push(
-            MaterialPageRoute(
-              builder: (_) => MessageDetailPage(
-                sensorName: sensorName,
-                message: message,
-                timestamp: timestamp,
-              ),
-            ),
-          );
+          _openLatestMessageForSensor(sensorName);
         }
       }
     },
@@ -159,6 +150,49 @@ Future<void> showLocalNotification(
     platformDetails,
     payload: payload,
   );
+}
+
+/// Opens the latest message detail for a sensor from notification tap
+Future<void> _openLatestMessageForSensor(String sensorName) async {
+  try {
+    final snap = await FirebaseFirestore.instance
+        .collection('messages')
+        .where('sensorName', isEqualTo: sensorName)
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .get();
+
+    if (snap.docs.isNotEmpty) {
+      final doc = snap.docs.first;
+      final data = doc.data();
+      final timestamp = data['timestamp'] is Timestamp
+          ? (data['timestamp'] as Timestamp).toDate()
+          : DateTime.now();
+
+      // Mark as read
+      await FirebaseFirestore.instance
+          .collection('messages')
+          .doc(doc.id)
+          .update({'isRead': true});
+
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => MessageDetailPage(
+            docId: doc.id,
+            sensorName: data['sensorName'] ?? sensorName,
+            message: data['message'] ?? 'Tidak ada pesan',
+            status: data['status'] ?? 'Tidak Subur',
+            sensorValue: (data['sensorValue'] ?? 0.0).toDouble(),
+            unit: data['unit'] ?? '',
+            idealRange: data['idealRange'] ?? '-',
+            timestamp: timestamp,
+          ),
+        ),
+      );
+    }
+  } catch (e) {
+    print('Error opening message from notification: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {

@@ -217,35 +217,109 @@ class _HomePageState extends State<HomePage> {
   //     print("Pesan dikirim untuk sensor $sensorName");
   //   }
   // }
+  /// Mendapatkan nilai sensor saat ini berdasarkan nama
+  double _getSensorValue(String sensorName) {
+    final service = SensorValueService();
+    switch (sensorName) {
+      case "Temperature":
+        return service.temperature;
+      case "pH":
+        return service.ph;
+      case "Nitrogen":
+        return service.nitrogen;
+      case "Soil Moisture":
+        return service.soilMoisture;
+      case "Kalium":
+        return service.kalium;
+      case "Phospor":
+        return service.phospor;
+      default:
+        return 0.0;
+    }
+  }
+
+  /// Mendapatkan rentang ideal untuk sensor
+  String _getIdealRange(String sensorName) {
+    switch (sensorName) {
+      case "Temperature":
+        return "24 – 32 °C";
+      case "pH":
+        return "5.5 – 8.2";
+      case "Nitrogen":
+        return "20 – 50 mg/kg";
+      case "Soil Moisture":
+        return "33 – 90 %";
+      case "Kalium":
+        return "20 – 50 mg/kg";
+      case "Phospor":
+        return "40 – 60 mg/kg";
+      default:
+        return "-";
+    }
+  }
+
+  /// Mendapatkan unit sensor
+  String _getSensorUnit(String sensorName) {
+    switch (sensorName) {
+      case "Temperature":
+        return "°C";
+      case "pH":
+        return "";
+      case "Nitrogen":
+      case "Kalium":
+      case "Phospor":
+        return "mg/kg";
+      case "Soil Moisture":
+        return "%";
+      default:
+        return "";
+    }
+  }
+
   Future<void> checkAndSendMessage(String sensorName, String status) async {
-    if (status != "Tidak Subur") return;
+    if (status != "Tidak Subur" && status != "Kurang Subur") return;
 
     final now = DateTime.now();
-    final docRef =
-        FirebaseFirestore.instance.collection('messages').doc(sensorName);
-    final doc = await docRef.get();
 
-    final lastSent =
-        doc.exists ? (doc['lastSent'] as Timestamp).toDate() : DateTime(2000);
+    // Cek lastSent dari dokumen tracker (terpisah dari pesan)
+    final trackerRef =
+        FirebaseFirestore.instance.collection('message_tracker').doc(sensorName);
+    final trackerDoc = await trackerRef.get();
+
+    final lastSent = trackerDoc.exists
+        ? (trackerDoc['lastSent'] as Timestamp).toDate()
+        : DateTime(2000);
     final difference = now.difference(lastSent);
 
-    if (difference.inMinutes >= 1) {
-      final messageText = 'Sensor $sensorName tidak subur.';
+    // Kirim pesan baru setiap 30 menit
+    if (difference.inMinutes >= 30) {
+      final sensorValue = _getSensorValue(sensorName);
+      final unit = _getSensorUnit(sensorName);
+      final idealRange = _getIdealRange(sensorName);
+
+      final messageText =
+          'Sensor $sensorName $status. Nilai saat ini: ${sensorValue.toStringAsFixed(2)} $unit (Rentang ideal: $idealRange).';
+
       final payload = "$sensorName|$messageText|${now.toIso8601String()}";
 
-      await docRef.set({
+      // Buat dokumen BARU (menambah, bukan overwrite)
+      await FirebaseFirestore.instance.collection('messages').add({
         'sensorName': sensorName,
+        'status': status,
         'message': messageText,
+        'sensorValue': sensorValue,
+        'idealRange': idealRange,
+        'unit': unit,
         'timestamp': Timestamp.now(),
-        'lastSent': Timestamp.now(),
-      }, SetOptions(merge: true));
+        'isRead': false,
+      });
 
-      // Panggil notifikasi lokal
-      // await showLocalNotification(
-      //   sensorName,
-      //   messageText,
-      //   "$sensorName|$messageText|${now.toIso8601String()}",
-      // );
+      // Update tracker
+      await trackerRef.set({
+        'sensorName': sensorName,
+        'lastSent': Timestamp.now(),
+      });
+
       await showLocalNotification(
         "Peringatan: $sensorName",
         messageText,
