@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 import 'package:smart_agriculture_jadi/pages/home_page.dart';
 
 // class SensorPhPage extends StatefulWidget {
@@ -321,8 +322,7 @@ class _SensorPhPageState extends State<SensorPhPage> {
   static const _darkGreen = Color(0xFF2E7D32);
   static const _lightGreen = Color(0xFFE8F5E9);
 
-  final CollectionReference _ref =
-      FirebaseFirestore.instance.collection('uplink-p2p');
+  static const String _apiUrl = 'https://api.fadhilahnaf.com/api/sensor-data';
 
   DateTime? _selectedDate;
   bool _isLoading = true;
@@ -364,25 +364,30 @@ class _SensorPhPageState extends State<SensorPhPage> {
         startOfDay = endOfDay.subtract(const Duration(hours: 24));
       }
 
-      final startEpoch = startOfDay.millisecondsSinceEpoch;
-      final endEpoch = endOfDay.millisecondsSinceEpoch;
+      final response = await http
+          .get(Uri.parse(_apiUrl))
+          .timeout(const Duration(seconds: 15));
 
-      final snap = await _ref
-          .orderBy('timestamp')
-          .where('timestamp', isGreaterThanOrEqualTo: startEpoch)
-          .where('timestamp', isLessThan: endEpoch)
-          .get();
-
-      final spots = <FlSpot>[];
-      for (final doc in snap.docs) {
-        final d = doc.data() as Map<String, dynamic>;
-        final ts = d['timestamp'] ?? 0;
-        final uplink = d['uplink'] ?? {};
-        final temp = double.tryParse(uplink['ph']?.toString() ?? '') ?? 0.0;
-        spots.add(FlSpot(ts.toDouble(), temp));
+      if (response.statusCode != 200) {
+        throw Exception('HTTP ${response.statusCode}');
       }
 
-      // Sort by time
+      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      final List<dynamic> dataList = decoded['data'] ?? [];
+
+      final spots = <FlSpot>[];
+      for (final item in dataList) {
+        final waktuStr = item['waktu_rekam'] as String?;
+        if (waktuStr == null) continue;
+        final dt = DateTime.tryParse(waktuStr);
+        if (dt == null) continue;
+        if (dt.isBefore(startOfDay) || dt.isAfter(endOfDay)) continue;
+
+        final ts = dt.millisecondsSinceEpoch.toDouble();
+        final val = (item['ph_tanah'] as num?)?.toDouble() ?? 0.0;
+        spots.add(FlSpot(ts, val));
+      }
+
       spots.sort((a, b) => a.x.compareTo(b.x));
 
       setState(() {
@@ -391,14 +396,13 @@ class _SensorPhPageState extends State<SensorPhPage> {
         if (spots.isNotEmpty) {
           _baseMinX = spots.first.x;
           _baseMaxX = spots.last.x;
-          // Add small padding
           final range = _baseMaxX - _baseMinX;
           final pad = range * 0.02;
           _baseMinX -= pad;
           _baseMaxX += pad;
         } else {
-          _baseMinX = startEpoch.toDouble();
-          _baseMaxX = endEpoch.toDouble();
+          _baseMinX = startOfDay.millisecondsSinceEpoch.toDouble();
+          _baseMaxX = endOfDay.millisecondsSinceEpoch.toDouble();
         }
         _minX = _baseMinX;
         _maxX = _baseMaxX;

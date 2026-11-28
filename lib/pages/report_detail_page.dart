@@ -1,6 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:csv/csv.dart';
@@ -22,6 +23,7 @@ class _ReportDetailPageState extends State<ReportDetailPage>
   static const _primaryGreen = Color(0xFF4CAF50);
   static const _darkGreen = Color(0xFF2E7D32);
   static const _lightGreen = Color(0xFFE8F5E9);
+  static const String _apiUrl = 'https://api.fadhilahnaf.com/api/sensor-data';
 
   // --- Column definitions ---
   static const _columns = [
@@ -84,19 +86,50 @@ class _ReportDetailPageState extends State<ReportDetailPage>
       final day = DateTime(
           widget.selectedDate.year, widget.selectedDate.month, widget.selectedDate.day);
       final next = day.add(const Duration(days: 1));
-      final snap = await FirebaseFirestore.instance
-          .collection('uplink-p2p')
-          .where('timestamp', isGreaterThanOrEqualTo: day.millisecondsSinceEpoch)
-          .where('timestamp', isLessThan: next.millisecondsSinceEpoch)
-          .orderBy('timestamp')
-          .get();
+
+      final response = await http
+          .get(Uri.parse(_apiUrl))
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200) {
+        throw Exception('HTTP ${response.statusCode}');
+      }
+
+      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      final List<dynamic> dataList = decoded['data'] ?? [];
+
+      final mapped = <Map<String, dynamic>>[];
+      for (final item in dataList) {
+        final waktuStr = item['waktu_rekam'] as String?;
+        if (waktuStr == null) continue;
+        final dt = DateTime.tryParse(waktuStr);
+        if (dt == null) continue;
+        if (dt.isBefore(day) || !dt.isBefore(next)) continue;
+
+        mapped.add({
+          'timestamp': dt.millisecondsSinceEpoch,
+          'uplink': {
+            'temperature': item['suhu_udara'],
+            'humidity': item['kelembapan_tanah'],
+            'ph': item['ph_tanah'],
+            'nitrogen': item['nitrogen'],
+            'phossporus': item['fosfor'],
+            'potassium': item['kalium'],
+          },
+        });
+      }
+
+      mapped.sort((a, b) => (a['timestamp'] as int).compareTo(b['timestamp'] as int));
+
+      if (!mounted) return;
       setState(() {
-        _allData = snap.docs.map((d) => d.data()).toList();
+        _allData = mapped;
         _isLoading = false;
         _currentPage = 1;
       });
       _fadeCtrl.forward(from: 0);
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _errorMessage = '$e';

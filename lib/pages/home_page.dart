@@ -1,5 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-// import 'package:smart_agriculture_jadi/main.dart';
+import 'package:http/http.dart' as http;
 import 'package:smart_agriculture_jadi/pages/sensor_kalium.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_kelembaban.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_nitrogen.dart';
@@ -8,11 +10,10 @@ import 'package:smart_agriculture_jadi/pages/sensor_phospor.dart';
 import 'package:smart_agriculture_jadi/pages/sensor_suhu.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+// import 'package:socket_io_client/socket_io_client.dart' as IO; // Sementara dinonaktifkan
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// // import 'package:overlay_support/overlay_support.dart'; // Untuk notifikasi lokal
 
 void main() {
   runApp(MyApp());
@@ -36,34 +37,10 @@ class HomePage extends StatefulWidget {
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-// Future<void> showLocalNotification(
-//     String title, String body, String payload) async {
-//   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-//     'sensor_channel_id',
-//     'Sensor Alerts',
-//     channelDescription: 'Notifikasi untuk kondisi sensor tidak subur',
-//     importance: Importance.max,
-//     priority: Priority.high,
-//     ticker: 'ticker',
-//   );
-
-//   const NotificationDetails platformDetails = NotificationDetails(
-//     android: androidDetails,
-//   );
-
-//   await flutterLocalNotificationsPlugin.show(
-//     0,
-//     title,
-//     body,
-//     platformDetails,
-//     payload: payload,
-//   );
-// }
-
 Future<void> showLocalNotification(
     String title, String body, String payload) async {
   final int notificationId =
-      DateTime.now().millisecondsSinceEpoch.remainder(100000); // ✅ ID unik
+      DateTime.now().millisecondsSinceEpoch.remainder(100000);
 
   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
     'sensor_channel_id',
@@ -86,16 +63,77 @@ Future<void> showLocalNotification(
 }
 
 class _HomePageState extends State<HomePage> {
-  IO.Socket? socket;
+  // IO.Socket? socket; // Sementara dinonaktifkan
+  Timer? _pollingTimer;
+  static const String _apiUrl =
+      'https://api.fadhilahnaf.com/api/lahan/1/terbaru';
+
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    connectToSocket();
+    // connectToSocket(); // Sementara dinonaktifkan, diganti ambil dari API
+    fetchSensorFromApi();
+
+    // Cek pembaruan data dari API secara berkala (misal tiap 1 menit)
+    _pollingTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      fetchSensorFromApi();
+    });
+
     FirebaseMessaging.instance.subscribeToTopic('sensor_alerts');
-    // setupFCM();/
   }
 
+  /// Mengambil data sensor terbaru dari API FastAPI pribadi
+  Future<void> fetchSensorFromApi() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final response = await http
+          .get(Uri.parse(_apiUrl))
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        final sensorTerbaru =
+            decoded['sensor_terbaru'] as Map<String, dynamic>?;
+
+        if (sensorTerbaru != null) {
+          // Mapping key dari API PostgreSQL ke format yang dipakai updateSensorData
+          final mappedData = {
+            'uplink': {
+              'temperature': sensorTerbaru['suhu_udara'],
+              'humidity': sensorTerbaru['kelembapan_tanah'],
+              'ph': sensorTerbaru['ph_tanah'],
+              'nitrogen': sensorTerbaru['nitrogen'],
+              'potassium': sensorTerbaru['kalium'],
+              'phossporus': sensorTerbaru['fosfor'],
+            }
+          };
+
+          updateSensorData(mappedData);
+        } else {
+          if (mounted) setState(() => _errorMessage = 'Data sensor tidak ditemukan dari API.');
+        }
+      } else {
+        if (mounted) setState(() => _errorMessage = 'Gagal memuat API: HTTP ${response.statusCode}');
+        print("Gagal memuat API: HTTP ${response.statusCode}");
+      }
+    } catch (e) {
+      if (mounted) setState(() => _errorMessage = 'Gagal terhubung ke server: $e');
+      print("Error mengambil data dari API: $e");
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  /* 
+  // --- KODE SOCKET LAMA (DISIMPAN UNTUK NANTI JIKA DIPAKAI LAGI) ---
   void connectToSocket() {
     print("Trying to connect to socket.io...");
 
@@ -106,20 +144,10 @@ class _HomePageState extends State<HomePage> {
 
     socket!.onConnect((_) {
       print("✅ Connected to socket.io");
-      // Fluttertoast.showToast(
-      //   msg: " Perangkat tersambung",
-      //   toastLength: Toast.LENGTH_SHORT,
-      //   gravity: ToastGravity.BOTTOM,
-      // );
     });
 
     socket!.onDisconnect((_) {
       print("Socket disconnected");
-      // Fluttertoast.showToast(
-      //   msg: "Perangkat terputus",
-      //   toastLength: Toast.LENGTH_SHORT,
-      //   gravity: ToastGravity.BOTTOM,
-      // );
     });
 
     socket!.onConnectError((err) {
@@ -134,14 +162,10 @@ class _HomePageState extends State<HomePage> {
       print("Received send-uplink-p2p: $data");
       if (data is Map<String, dynamic>) {
         updateSensorData(data);
-        // Fluttertoast.showToast(
-        //   // msg: "",
-        //   // toastLength: Toast.LENGTH_SHORT,
-        //   // gravity: ToastGravity.BOTTOM,
-        // );
       }
     });
   }
+  */
 
   void updateSensorData(Map<String, dynamic> data) {
     final uplink = data['uplink'] ?? {};
@@ -152,40 +176,44 @@ class _HomePageState extends State<HomePage> {
     final double ph = parseToDouble(uplink['ph']);
     final double nitrogen = parseToDouble(uplink['nitrogen']);
     final double kalium = parseToDouble(uplink['potassium']);
-    final double phospor = parseToDouble(
-        uplink['phossporus']); // pastikan key-nya memang "phossporus"
+    final double phospor = parseToDouble(uplink['phossporus']);
+
+    if (!mounted) return;
 
     setState(() {
+      _isLoading = false;
+      _errorMessage = null;
+
       sensorData[0]['value'] = '${temperature.toStringAsFixed(1)}°C';
-      sensorData[0]['status'] = getStatus("Temperature", temperature);
-      sensorData[0]['statusColor'] = getStatusColor(sensorData[0]['status']);
+      final tempStatus = getStatus("Temperature", temperature);
+      sensorData[0]['status'] = tempStatus;
+      sensorData[0]['statusColor'] = getStatusColor(tempStatus);
 
       sensorData[1]['value'] = '${ph.toStringAsFixed(1)}';
-      sensorData[1]['status'] = getStatus("pH", ph);
-      sensorData[1]['statusColor'] = getStatusColor(sensorData[1]['status']);
+      final phStatus = getStatus("pH", ph);
+      sensorData[1]['status'] = phStatus;
+      sensorData[1]['statusColor'] = getStatusColor(phStatus);
 
       sensorData[2]['value'] = '${nitrogen.toStringAsFixed(1)} mg/kg';
-      sensorData[2]['status'] = getStatus("Nitrogen", nitrogen);
-      sensorData[2]['statusColor'] = getStatusColor(sensorData[2]['status']);
+      final nitrogenStatus = getStatus("Nitrogen", nitrogen);
+      sensorData[2]['status'] = nitrogenStatus;
+      sensorData[2]['statusColor'] = getStatusColor(nitrogenStatus);
 
       sensorData[3]['value'] = '${soilMoisture.toStringAsFixed(1)}%';
-      sensorData[3]['status'] = getStatus("Soil Moisture", soilMoisture);
-      sensorData[3]['statusColor'] = getStatusColor(sensorData[3]['status']);
+      final moistureStatus = getStatus("Soil Moisture", soilMoisture);
+      sensorData[3]['status'] = moistureStatus;
+      sensorData[3]['statusColor'] = getStatusColor(moistureStatus);
 
-      sensorData[4]['value'] = '$kalium mg/kg';
-      sensorData[4]['status'] = getStatus("Kalium", kalium);
-      sensorData[4]['statusColor'] = getStatusColor(sensorData[4]['status']);
+      sensorData[4]['value'] = '${kalium.toStringAsFixed(1)} mg/kg';
+      final kaliumStatus = getStatus("Kalium", kalium);
+      sensorData[4]['status'] = kaliumStatus;
+      sensorData[4]['statusColor'] = getStatusColor(kaliumStatus);
 
-      sensorData[5]['value'] = '$phospor mg/kg';
-      sensorData[5]['status'] = getStatus("Phospor", phospor);
-      sensorData[5]['statusColor'] = getStatusColor(sensorData[5]['status']);
+      sensorData[5]['value'] = '${phospor.toStringAsFixed(1)} mg/kg';
+      final phosporStatus = getStatus("Phospor", phospor);
+      sensorData[5]['status'] = phosporStatus;
+      sensorData[5]['statusColor'] = getStatusColor(phosporStatus);
     });
-    checkAndSendMessage("Temperature", sensorData[0]['status']);
-    checkAndSendMessage("pH", sensorData[1]['status']);
-    checkAndSendMessage("Nitrogen", sensorData[2]['status']);
-    checkAndSendMessage("Soil Moisture", sensorData[3]['status']);
-    checkAndSendMessage("Kalium", sensorData[4]['status']);
-    checkAndSendMessage("Phospor", sensorData[5]['status']);
 
     service.temperature = temperature;
     service.ph = ph;
@@ -193,31 +221,15 @@ class _HomePageState extends State<HomePage> {
     service.soilMoisture = soilMoisture;
     service.kalium = kalium;
     service.phospor = phospor;
+
+    checkAndSendMessage("Temperature", sensorData[0]['status'] as String? ?? '-');
+    checkAndSendMessage("pH", sensorData[1]['status'] as String? ?? '-');
+    checkAndSendMessage("Nitrogen", sensorData[2]['status'] as String? ?? '-');
+    checkAndSendMessage("Soil Moisture", sensorData[3]['status'] as String? ?? '-');
+    checkAndSendMessage("Kalium", sensorData[4]['status'] as String? ?? '-');
+    checkAndSendMessage("Phospor", sensorData[5]['status'] as String? ?? '-');
   }
 
-  // Future<void> checkAndSendMessage(String sensorName, String status) async {
-  //   if (status != "Tidak Subur") return;
-
-  //   final now = DateTime.now();
-  //   final docRef =
-  //       FirebaseFirestore.instance.collection('messages').doc(sensorName);
-  //   final doc = await docRef.get();
-
-  //   final lastSent =
-  //       doc.exists ? (doc['lastSent'] as Timestamp).toDate() : DateTime(2000);
-  //   final difference = now.difference(lastSent);
-
-  //   if (difference.inMinutes >= 1) {
-  //     await docRef.set({
-  //       'sensorName': sensorName,
-  //       'message': 'Sensor $sensorName tidak subur.',
-  //       'timestamp': Timestamp.now(),
-  //       'lastSent': Timestamp.now(),
-  //     }, SetOptions(merge: true));
-  //     print("Pesan dikirim untuk sensor $sensorName");
-  //   }
-  // }
-  /// Mendapatkan nilai sensor saat ini berdasarkan nama
   double _getSensorValue(String sensorName) {
     final service = SensorValueService();
     switch (sensorName) {
@@ -238,7 +250,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  /// Mendapatkan rentang ideal untuk sensor
   String _getIdealRange(String sensorName) {
     switch (sensorName) {
       case "Temperature":
@@ -258,7 +269,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  /// Mendapatkan unit sensor
   String _getSensorUnit(String sensorName) {
     switch (sensorName) {
       case "Temperature":
@@ -280,8 +290,6 @@ class _HomePageState extends State<HomePage> {
     if (status != "Tidak Subur" && status != "Kurang Subur") return;
 
     final now = DateTime.now();
-
-    // Cek lastSent dari dokumen tracker (terpisah dari pesan)
     final trackerRef =
         FirebaseFirestore.instance.collection('message_tracker').doc(sensorName);
     final trackerDoc = await trackerRef.get();
@@ -291,7 +299,6 @@ class _HomePageState extends State<HomePage> {
         : DateTime(2000);
     final difference = now.difference(lastSent);
 
-    // Kirim pesan baru setiap 30 menit
     if (difference.inMinutes >= 30) {
       final sensorValue = _getSensorValue(sensorName);
       final unit = _getSensorUnit(sensorName);
@@ -302,7 +309,6 @@ class _HomePageState extends State<HomePage> {
 
       final payload = "$sensorName|$messageText|${now.toIso8601String()}";
 
-      // Buat dokumen BARU (menambah, bukan overwrite)
       await FirebaseFirestore.instance.collection('messages').add({
         'sensorName': sensorName,
         'status': status,
@@ -314,7 +320,6 @@ class _HomePageState extends State<HomePage> {
         'isRead': false,
       });
 
-      // Update tracker
       await trackerRef.set({
         'sensorName': sensorName,
         'lastSent': Timestamp.now(),
@@ -353,30 +358,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _handleRefresh() async {
-    print('Refreshing socket connection...');
-
-    // Disconnect if already connected
-    if (socket != null) {
-      socket!.disconnect();
-      socket!.clearListeners();
-    }
-
-    // Reconnect
-    connectToSocket();
-    resetSensorData();
+    print('Refreshing data from API...');
 
     Fluttertoast.showToast(
-      msg: "Memuat ulang data...",
+      msg: "Memuat ulang data dari API...",
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
     );
 
-    await Future.delayed(Duration(seconds: 1)); // untuk animasi refresh
+    await fetchSensorFromApi();
   }
 
   @override
   void dispose() {
-    socket?.disconnect();
+    _pollingTimer?.cancel();
+    // socket?.disconnect();
     super.dispose();
   }
 
@@ -431,60 +427,96 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             const SizedBox(height: 30),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: _handleRefresh,
-                child: GridView.builder(
-                  itemCount: 6,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1,
+            if (_isLoading)
+              const Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(color: Colors.green),
+                      SizedBox(height: 16),
+                      Text('Memuat data sensor...', style: TextStyle(color: Colors.grey)),
+                    ],
                   ),
-                  itemBuilder: (context, index) {
-                    return SensorCard(
-                      sensor: sensorData[index],
-                      onTap: () {
-                        // halaman detail
-                        String title = sensorData[index]["title"];
-                        if (title == "Temperature") {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => SensorSuhuPage()));
-                        } else if (title == "pH") {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => SensorPhPage()));
-                        } else if (title == "Nitrogen") {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => SensorNitrogenPage()));
-                        } else if (title == "Soil Moisture") {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => SensorKelembabanPage()));
-                        } else if (title == "Kalium") {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => SensorKaliumPage()));
-                        } else if (title == "Phospor") {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => SensorPhosporPage()));
-                        }
-                      },
-                    );
-                  },
+                ),
+              )
+            else if (_errorMessage != null)
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.wifi_off_rounded, size: 56, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text(_errorMessage!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: fetchSensorFromApi,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Coba Lagi'),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _handleRefresh,
+                  child: GridView.builder(
+                    itemCount: 6,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1,
+                    ),
+                    itemBuilder: (context, index) {
+                      return SensorCard(
+                        sensor: sensorData[index],
+                        onTap: () {
+                          String title = sensorData[index]["title"];
+                          if (title == "Temperature") {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => SensorSuhuPage()));
+                          } else if (title == "pH") {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => SensorPhPage()));
+                          } else if (title == "Nitrogen") {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => SensorNitrogenPage()));
+                          } else if (title == "Soil Moisture") {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => SensorKelembabanPage()));
+                          } else if (title == "Kalium") {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => SensorKaliumPage()));
+                          } else if (title == "Phospor") {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => SensorPhosporPage()));
+                          }
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -516,7 +548,6 @@ class SensorCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Title
             Positioned(
               left: sensor['titleOffsetX'] ?? 0.0,
               top: sensor['titleOffsetY'] ?? 0.0,
@@ -525,24 +556,18 @@ class SensorCard extends StatelessWidget {
                 style: TextStyle(
                     fontSize: sensor['titleFontSize']?.toDouble() ?? 13.0,
                     fontWeight: FontWeight.bold,
-                    // color: sensor['titleColor'] ?? Colors.black,
                     color: sensor['statusColor'] ?? Colors.grey),
               ),
             ),
-
-            // Icon
             Positioned(
               left: sensor['iconOffsetX'] ?? 0.0,
               top: sensor['iconOffsetY'] ?? 0.0,
               child: Icon(
                 sensor['icon'],
-                // color: sensor['iconColor'],
                 color: sensor['statusColor'] ?? Colors.grey,
                 size: sensor['iconSize']?.toDouble() ?? 32.0,
               ),
             ),
-
-            // Value
             Positioned(
               left: sensor['valueOffsetX'] ?? 0.0,
               top: sensor['valueOffsetY'] ?? 0.0,
@@ -551,12 +576,9 @@ class SensorCard extends StatelessWidget {
                 style: TextStyle(
                     fontSize: sensor['valueFontSize']?.toDouble() ?? 20.0,
                     fontWeight: FontWeight.bold,
-                    // color: sensor['iconColor'],
                     color: sensor['statusColor'] ?? Colors.grey),
               ),
             ),
-
-            // Status Button (SUBUR/KURANG SUBUR)
             Positioned(
               left: sensor['statusOffsetX'] ?? 0.0,
               top: sensor['statusOffsetY'] ?? 0.0,
@@ -577,8 +599,6 @@ class SensorCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // // Detail Bar
             Positioned(
               bottom: 0,
               left: 0,
@@ -668,7 +688,6 @@ Color getStatusColor(String status) {
   }
 }
 
-// Data Sensor tetap sama
 List<Map<String, dynamic>> sensorData = [
   {
     "icon": Icons.thermostat,
@@ -744,6 +763,7 @@ List<Map<String, dynamic>> sensorData = [
     "iconOffsetY": 40.0,
     "valueOffsetX": 80.0,
     "valueOffsetY": 50.0,
+    "valueFontSize": 20.0,
     "title": "Soil Moisture",
     "titleFontSize": 13.0,
     "titleOffsetX": 15.0,
